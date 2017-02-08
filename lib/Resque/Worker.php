@@ -229,7 +229,7 @@ class Resque_Worker
 					if (in_array($job->getStatus(), array(Resque_Job_Status::STATUS_WAITING, Resque_Job_Status::STATUS_RUNNING)))
 					{
 						$job->updateStatus(Resque_Job_Status::STATUS_COMPLETE);
-						$this->log('done ' . $job);
+						$this->logger->log('done ' . $job);
 					}
 				}
 			}
