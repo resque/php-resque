@@ -146,3 +146,11 @@ class Test_Job_With_TearDown
 		self::$called = true;
 	}
 }
+
+class Test_Infinite_Recursion_Job
+{
+    public function perform()
+    {
+        $this->perform();
+    }
+}

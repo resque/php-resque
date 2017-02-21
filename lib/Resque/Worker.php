@@ -218,8 +218,10 @@ class Resque_Worker
 
 				// Wait until the child process finishes before continuing
 				pcntl_wait($status);
-				$exitStatus = pcntl_wexitstatus($status);
-				if($exitStatus !== 0) {
+
+				if (pcntl_wifexited($status) !== true) {
+					$job->fail(new Resque_Job_DirtyExitException('Job exited abnormally'));
+				} elseif (($exitStatus = pcntl_wexitstatus($status)) !== 0) {
 					$job->fail(new Resque_Job_DirtyExitException(
 						'Job exited with exit code ' . $exitStatus
 					));
@@ -229,7 +231,7 @@ class Resque_Worker
 					if (in_array($job->getStatus(), array(Resque_Job_Status::STATUS_WAITING, Resque_Job_Status::STATUS_RUNNING)))
 					{
 						$job->updateStatus(Resque_Job_Status::STATUS_COMPLETE);
-						$this->logger->log('done ' . $job);
+						$this->logger->log(Psr\Log\LogLevel::INFO, 'done ' . $job);
 					}
 				}
 			}

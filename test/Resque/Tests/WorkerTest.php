@@ -290,4 +290,15 @@ class Resque_Tests_WorkerTest extends Resque_Tests_TestCase
 
         $this->assertEquals(2, $i);
     }
+
+    public function testWorkerFailsSegmentationFaultJob()
+    {
+        Resque::enqueue('jobs', 'Test_Infinite_Recursion_Job');
+
+        $worker = new Resque_Worker('jobs');
+        $worker->setLogger(new Resque_Log());
+        $worker->work(0);
+
+        $this->assertEquals(1, Resque_Stat::get('failed'));
+    }
 }
