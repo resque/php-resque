@@ -36,6 +36,8 @@ It also supports the following additional features:
 -   Has built in support for `setUp` and `tearDown` methods, called pre and post
     jobs
 
+This port is originally based on the works of Chris Boulton et al, see <https://github.com/chrisboulton/php-resque>
+
 ## Requirements
 
 -   PHP 5.3+
