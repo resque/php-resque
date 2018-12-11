@@ -123,14 +123,14 @@ class Resque_Job
 	 *
 	 * @param int $status Status constant from Resque_Job_Status indicating the current status of a job.
 	 */
-	public function updateStatus($status)
+	public function updateStatus($status, $result = null)
 	{
 		if(empty($this->payload['id'])) {
 			return;
 		}
 
 		$statusInstance = new Resque_Job_Status($this->payload['id']);
-		$statusInstance->update($status);
+		$statusInstance->update($status, $result);
 	}
 
 	/**
@@ -183,6 +183,7 @@ class Resque_Job
 	 */
 	public function perform()
 	{
+		$result = true;
 		try {
 			Resque_Event::trigger('beforePerform', $this);
 
@@ -191,7 +192,7 @@ class Resque_Job
 				$instance->setUp();
 			}
 
-			$instance->perform();
+			$result = $instance->perform();
 
 			if(method_exists($instance, 'tearDown')) {
 				$instance->tearDown();
@@ -201,10 +202,10 @@ class Resque_Job
 		}
 		// beforePerform/setUp have said don't perform this job. Return.
 		catch(Resque_Job_DontPerform $e) {
-			return false;
+			$result = false;
 		}
 
-		return true;
+		return $result;
 	}
 
 	/**
