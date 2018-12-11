@@ -141,9 +141,9 @@ class Resque
 	public static function dequeue($queue, $items = Array())
 	{
 	    if(count($items) > 0) {
-		return self::removeItems($queue, $items);
+			return self::removeItems($queue, $items);
 	    } else {
-		return self::removeList($queue);
+			return self::removeList($queue);
 	    }
 	}
 
@@ -265,6 +265,20 @@ class Resque
 	}
 
 	/**
+	 * Retrieve all the items of a queue with Redis
+	 *
+	 * @return array Array of items.
+	 */
+	public static function items($queue, $start = 0, $stop = -1)
+	{
+		$list = self::redis()->lrange('queue:' . $queue, $start, $stop);
+		if(!is_array($list)) {
+			$list = array();
+		}
+		return $list;
+	}
+
+	/**
 	 * Remove Items from the queue
 	 * Safely moving each item to a temporary queue before processing it
 	 * If the Job matches, counts otherwise puts it in a requeue_queue
@@ -318,7 +332,7 @@ class Resque
 
 	/**
 	 * matching item
-	 * item can be ['class'] or ['class' => 'id'] or ['class' => {:foo => 1, :bar => 2}]
+	 * item can be ['class'] or ['class' => 'id'] or ['class' => {'foo' => 1, 'bar' => 2}]
 	 * @private
 	 *
 	 * @params string $string redis result in json
@@ -331,24 +345,24 @@ class Resque
 	    $decoded = json_decode($string, true);
 
 	    foreach($items as $key => $val) {
-		# class name only  ex: item[0] = ['class']
-		if (is_numeric($key)) {
-		    if($decoded['class'] == $val) {
-			return true;
-		    }
-		# class name with args , example: item[0] = ['class' => {'foo' => 1, 'bar' => 2}]
-    		} elseif (is_array($val)) {
-		    $decodedArgs = (array)$decoded['args'][0];
-		    if ($decoded['class'] == $key &&
-			count($decodedArgs) > 0 && count(array_diff($decodedArgs, $val)) == 0) {
-			return true;
+			# class name only  ex: item[0] = ['class']
+			if (is_numeric($key)) {
+			    if($decoded['class'] == $val) {
+					return true;
+			    }
+			# class name with args , example: item[0] = ['class' => {'foo' => 1, 'bar' => 2}]
+			} elseif (is_array($val)) {
+			    $decodedArgs = (array)$decoded['args'][0];
+			    if ($decoded['class'] == $key &&
+					count($decodedArgs) > 0 && count(array_diff($decodedArgs, $val)) == 0) {
+					return true;
+				}
+			# class name with ID, example: item[0] = ['class' => 'id']
+			} else {
+			    if ($decoded['class'] == $key && $decoded['id'] == $val) {
+					return true;
+			    }
 			}
-		# class name with ID, example: item[0] = ['class' => 'id']
-		} else {
-		    if ($decoded['class'] == $key && $decoded['id'] == $val) {
-			return true;
-		    }
-		}
 	    }
 	    return false;
 	}
