@@ -53,11 +53,12 @@ class Resque_Job
 	 * @param array $args Any optional arguments that should be passed when the job is executed.
 	 * @param boolean $monitor Set to true to be able to monitor the status of a job.
 	 * @param string $id Unique identifier for tracking the job. Generated if not supplied.
+	 * @param string $prefix The prefix needs to be set for the status key
 	 *
 	 * @return string
 	 * @throws \InvalidArgumentException
 	 */
-	public static function create($queue, $class, $args = null, $monitor = false, $id = null)
+	public static function create($queue, $class, $args = null, $monitor = false, $id = null, $prefix = "")
 	{
 		if (is_null($id)) {
 			$id = Resque::generateJobId();
@@ -69,14 +70,15 @@ class Resque_Job
 			);
 		}
 		Resque::push($queue, array(
-			'class'	=> $class,
-			'args'	=> array($args),
-			'id'	=> $id,
+			'class'	     => $class,
+			'args'	     => array($args),
+			'id'	     => $id,
+			'prefix'     => $prefix,
 			'queue_time' => microtime(true),
 		));
 
 		if($monitor) {
-			Resque_Job_Status::create($id);
+			Resque_Job_Status::create($id, $prefix);
 		}
 
 		return $id;
@@ -129,7 +131,7 @@ class Resque_Job
 			return;
 		}
 
-		$statusInstance = new Resque_Job_Status($this->payload['id']);
+		$statusInstance = new Resque_Job_Status($this->payload['id'], $this->payload['prefix']);
 		$statusInstance->update($status, $result);
 	}
 
@@ -140,7 +142,7 @@ class Resque_Job
 	 */
 	public function getStatus()
 	{
-		$status = new Resque_Job_Status($this->payload['id']);
+		$status = new Resque_Job_Status($this->payload['id'], $this->payload['prefix']);
 		return $status->get();
 	}
 
@@ -237,13 +239,13 @@ class Resque_Job
 	 */
 	public function recreate()
 	{
-		$status = new Resque_Job_Status($this->payload['id']);
+		$status = new Resque_Job_Status($this->payload['id'], $this->payload['prefix']);
 		$monitor = false;
 		if($status->isTracking()) {
 			$monitor = true;
 		}
 
-		return self::create($this->queue, $this->payload['class'], $this->getArguments(), $monitor);
+		return self::create($this->queue, $this->payload['class'], $this->getArguments(), $monitor, $this->payload['prefix']);
 	}
 
 	/**

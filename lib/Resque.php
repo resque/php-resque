@@ -213,10 +213,11 @@ class Resque
 	 * @param string $class The name of the class that contains the code to execute the job.
 	 * @param array $args Any optional arguments that should be passed when the job is executed.
 	 * @param boolean $trackStatus Set to true to be able to monitor the status of a job.
+	 * @param string $prefix The prefix needs to be set for the status key
 	 *
 	 * @return string|boolean Job ID when the job was created, false if creation was cancelled due to beforeEnqueue
 	 */
-	public static function enqueue($queue, $class, $args = null, $trackStatus = false)
+	public static function enqueue($queue, $class, $args = null, $trackStatus = false, $prefix = "")
 	{
 		$id         = Resque::generateJobId();
 		$hookParams = array(
@@ -232,7 +233,7 @@ class Resque
 			return false;
 		}
 
-		Resque_Job::create($queue, $class, $args, $trackStatus, $id);
+		Resque_Job::create($queue, $class, $args, $trackStatus, $id, $prefix);
 		Resque_Event::trigger('afterEnqueue', $hookParams);
 
 		return $id;
