@@ -12,6 +12,11 @@ declare(ticks = 1);
 class Resque_Worker
 {
 	/**
+	 * @var string Prefix for the process name
+	 */
+	private static $processPrefix = 'resque';
+
+	/**
 	* @var LoggerInterface Logging object that impliments the PSR-3 LoggerInterface
 	*/
 	public $logger;
@@ -80,6 +85,15 @@ class Resque_Worker
 
         $this->id = $this->hostname . ':'.getmypid() . ':' . implode(',', $this->queues);
     }
+
+	/**
+	 * Set the process prefix of the workers to the given prefix string.
+	 * @param string $prefix The new process prefix
+	 */
+	public static function setProcessPrefix($prefix)
+	{
+		self::$processPrefix = $prefix;
+	}
 
 	/**
 	 * Return all workers known to Resque as instantiated instances.
@@ -376,7 +390,7 @@ class Resque_Worker
 	 */
 	private function updateProcLine($status)
 	{
-		$processTitle = 'resque-' . Resque::VERSION . ': ' . $status;
+		$processTitle = static::$processPrefix . '-' . Resque::VERSION . ': ' . $status;
 		if(function_exists('cli_set_process_title') && PHP_OS !== 'Darwin') {
 			cli_set_process_title($processTitle);
 		}
