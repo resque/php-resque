@@ -229,8 +229,8 @@ class Resque_Worker
 
 			$this->child = Resque::fork();
 
-			// Forked and we're the child. Run the job.
-			if ($this->child === 0 || $this->child === false) {
+			// Forked and we're the child. Or PCNTL is not installed. Run the job.
+			if ($this->child === 0 || $this->child === false || $this->child === -1) {
 				$status = 'Processing ' . $job->queue . ' since ' . strftime('%F %T');
 				$this->updateProcLine($status);
 				$this->logger->log(Psr\Log\LogLevel::INFO, $status);
@@ -529,9 +529,18 @@ class Resque_Worker
 	public function workerPids()
 	{
 		$pids = array();
-		exec('ps -A -o pid,args | grep [r]esque', $cmdOutput);
-		foreach($cmdOutput as $line) {
-			list($pids[],) = explode(' ', trim($line), 2);
+		if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+			exec('WMIC path win32_process get Processid,Commandline | findstr resque | findstr /V findstr', $cmdOutput);
+			foreach($cmdOutput as $line) {
+				$line = preg_replace('/\s+/m', ' ', $line);
+				list(,,$pids[]) = explode(' ', trim($line), 3);
+			}
+		}
+		else {
+			exec('ps -A -o pid,args | grep [r]esque', $cmdOutput);
+			foreach($cmdOutput as $line) {
+				list($pids[],) = explode(' ', trim($line), 2);
+			}
 		}
 		return $pids;
 	}
