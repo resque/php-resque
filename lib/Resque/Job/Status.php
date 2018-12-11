@@ -96,14 +96,20 @@ class Resque_Job_Status
 	 */
 	public function update($status, $result = null)
 	{
+		$status = (int) $status;
+
 		if(!$this->isTracking()) {
+			return;
+		}
+
+		if($status < self::STATUS_WAITING || $status > self::STATUS_COMPLETE) {
 			return;
 		}
 
 		$statusPacket = array(
 			'status'  => $status,
 			'updated' => time(),
-			'started' => $this->getValue('started'),
+			'started' => $this->fetch('started'),
 			'result'  => $result,
 		);
 		Resque::redis()->set((string)$this, json_encode($statusPacket));
@@ -115,23 +121,14 @@ class Resque_Job_Status
 	}
 
 	/**
-	 * Fetch a value from the status packet for the job being monitored.
+	 * Fetch the status for the job being monitored.
 	 *
-	 * @return mixed False if the status is not being monitored, otherwise the
-	 *  requested value from the status packet.
+	 * @return mixed False if the status is not being monitored, otherwise the status
+	 * 	as an integer, based on the Resque_Job_Status constants.
 	 */
-	protected function getValue($value = null)
+	public function get()
 	{
-		if(!$this->isTracking()) {
-			return false;
-		}
-
-		$statusPacket = json_decode(Resque::redis()->get((string)$this), true);
-		if(!$statusPacket) {
-			return false;
-		}
-
-		return empty($value) ? $statusPacket : $statusPacket[$value];
+		return $this->status();
 	}
 
 	/**
@@ -140,10 +137,32 @@ class Resque_Job_Status
 	 * @return mixed False if the status is not being monitored, otherwise the status
 	 * 	as an integer, based on the Resque_Job_Status constants.
 	 */
-	public function get()
+	public function status()
 	{
-		return $this->getValue('status');
+		return $this->fetch('status');
 	}
+
+	/**
+ 	 * Fetch the last update timestamp of the job being monitored.
+ 	 *
+ 	 * @return mixed False if the job is not being monitored, otherwise the
+	 *  update timestamp.
+ 	 */
+	public function updated()
+	{
+		return $this->fetch('updated');
+ 	}
+
+	/**
+ 	 * Fetch the start timestamp of the job being monitored.
+ 	 *
+ 	 * @return mixed False if the job is not being monitored, otherwise the
+	 *  start timestamp.
+ 	 */
+	public function started()
+	{
+		return $this->fetch('started');
+ 	}
 
 	/**
  	 * Fetch the result of the job being monitored.
@@ -151,9 +170,9 @@ class Resque_Job_Status
  	 * @return mixed False if the job is not being monitored, otherwise the result
  	 * 	as mixed
  	 */
-	public function getResult()
+	public function result()
 	{
-		return $this->getValue('result');
+		return $this->fetch('result');
  	}
 
 	/**
@@ -172,5 +191,34 @@ class Resque_Job_Status
 	public function __toString()
 	{
 		return 'job:' . $this->prefix . $this->id . ':status';
+	}
+
+	/**
+	* Fetch a value from the status packet for the job being monitored.
+	*
+	* @return mixed False if the status is not being monitored, otherwise the
+	*  requested value from the status packet.
+	*/
+	protected function fetch($value = null)
+	{
+		if(!$this->isTracking()) {
+			return false;
+		}
+
+		$statusPacket = json_decode(Resque::redis()->get((string)$this), true);
+		if(!$statusPacket) {
+			return false;
+		}
+
+		if(empty($value)) {
+			return $statusPacket;
+		} else {
+			if(isset($statusPacket[$value])) {
+				return $statusPacket[$value];
+			} else {
+				return null;
+			}
+		}
+
 	}
 }
