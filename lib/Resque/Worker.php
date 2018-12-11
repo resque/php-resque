@@ -220,7 +220,17 @@ class Resque_Worker
 				$status = 'Processing ' . $job->queue . ' since ' . strftime('%F %T');
 				$this->updateProcLine($status);
 				$this->logger->log(Psr\Log\LogLevel::INFO, $status);
+
+				if(!empty($job->payload['id'])) {
+					Resque_Job_PID::create($job->payload['id']);
+				}
+
 				$this->perform($job);
+
+				if(!empty($job->payload['id'])) {
+					Resque_Job_PID::del($job->payload['id']);
+				}
+
 				if ($this->child === 0) {
 					exit(0);
 				}
@@ -435,6 +445,13 @@ class Resque_Worker
 	{
 		$this->shutdown();
 		$this->killChild();
+	}
+
+	/**
+	 * @return int Child process PID.
+	 */
+	public function getChildPID() {
+		return $this->child;
 	}
 
 	/**
