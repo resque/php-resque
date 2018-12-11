@@ -28,6 +28,11 @@ class Resque
 	 */
 	protected static $redisDatabase = 0;
 
+    /**
+     * @var string auth of Redis database
+     */
+	protected static $auth;
+
 	/**
 	 * Given a host/port combination separated by a colon, set it as
 	 * the redis server that Resque will talk to.
@@ -37,11 +42,13 @@ class Resque
 	 *                      and returns a Resque_Redis instance, or
 	 *                      a nested array of servers with host/port pairs.
 	 * @param int $database
+     * @param string $auth
 	 */
-	public static function setBackend($server, $database = 0)
+	public static function setBackend($server, $database = 0, $auth = null)
 	{
 		self::$redisServer   = $server;
 		self::$redisDatabase = $database;
+		self::$auth          = $auth;
 		self::$redis         = null;
 	}
 
@@ -61,6 +68,10 @@ class Resque
 		} else {
 			self::$redis = new Resque_Redis(self::$redisServer, self::$redisDatabase);
 		}
+
+		if (!empty(self::$auth)) {
+            self::$redis->auth(self::$auth);
+        }
 
 		return self::$redis;
 	}

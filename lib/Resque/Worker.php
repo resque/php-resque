@@ -152,6 +152,10 @@ class Resque_Worker
 		$this->updateProcLine('Starting');
 		$this->startup();
 
+        if(function_exists('pcntl_signal_dispatch')) {
+            pcntl_signal_dispatch();
+        }
+
 		while(true) {
 			if($this->shutdown) {
 				break;
