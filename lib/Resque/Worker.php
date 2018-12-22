@@ -170,6 +170,8 @@ class Resque_Worker
 				$job = $this->reserve($blocking, $interval);
 			}
 
+			pcntl_signal_dispatch();
+
 			if(!$job) {
 				// For an interval of 0, break now - helps with unit testing etc
 				if($interval == 0) {
