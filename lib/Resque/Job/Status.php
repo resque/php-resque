@@ -14,6 +14,11 @@ class Resque_Job_Status
 	const STATUS_COMPLETE = 4;
 
 	/**
+ 	 * @var string The prefix of the job status id.
+ 	 */
+ 	private $prefix;
+
+	/**
 	 * @var string The ID of the job this status class refers back to.
 	 */
 	private $id;
@@ -37,9 +42,10 @@ class Resque_Job_Status
 	 *
 	 * @param string $id The ID of the job to manage the status for.
 	 */
-	public function __construct($id)
+	public function __construct($id, $prefix = '')
 	{
 		$this->id = $id;
+		$this->prefix = empty($prefix) ? '' : "${prefix}_";
 	}
 
 	/**
@@ -48,14 +54,18 @@ class Resque_Job_Status
 	 *
 	 * @param string $id The ID of the job to monitor the status of.
 	 */
-	public static function create($id)
+	public static function create($id, $prefix = "")
 	{
+		$status = new self($id, $prefix);
 		$statusPacket = array(
-			'status' => self::STATUS_WAITING,
+			'status'  => self::STATUS_WAITING,
 			'updated' => time(),
 			'started' => time(),
+			'result'  => null,
 		);
-		Resque::redis()->set('job:' . $id . ':status', json_encode($statusPacket));
+		Resque::redis()->set((string) $status, json_encode($statusPacket));
+
+		return $status;
 	}
 
 	/**
@@ -84,15 +94,23 @@ class Resque_Job_Status
 	 *
 	 * @param int The status of the job (see constants in Resque_Job_Status)
 	 */
-	public function update($status)
+	public function update($status, $result = null)
 	{
+		$status = (int) $status;
+
 		if(!$this->isTracking()) {
 			return;
 		}
 
+		if($status < self::STATUS_WAITING || $status > self::STATUS_COMPLETE) {
+			return;
+		}
+
 		$statusPacket = array(
-			'status' => $status,
+			'status'  => $status,
 			'updated' => time(),
+			'started' => $this->fetch('started'),
+			'result'  => $result,
 		);
 		Resque::redis()->set((string)$this, json_encode($statusPacket));
 
@@ -105,22 +123,57 @@ class Resque_Job_Status
 	/**
 	 * Fetch the status for the job being monitored.
 	 *
-	 * @return mixed False if the status is not being monitored, otherwise the status as
+	 * @return mixed False if the status is not being monitored, otherwise the status
 	 * 	as an integer, based on the Resque_Job_Status constants.
 	 */
 	public function get()
 	{
-		if(!$this->isTracking()) {
-			return false;
-		}
-
-		$statusPacket = json_decode(Resque::redis()->get((string)$this), true);
-		if(!$statusPacket) {
-			return false;
-		}
-
-		return $statusPacket['status'];
+		return $this->status();
 	}
+
+	/**
+	 * Fetch the status for the job being monitored.
+	 *
+	 * @return mixed False if the status is not being monitored, otherwise the status
+	 * 	as an integer, based on the Resque_Job_Status constants.
+	 */
+	public function status()
+	{
+		return $this->fetch('status');
+	}
+
+	/**
+ 	 * Fetch the last update timestamp of the job being monitored.
+ 	 *
+ 	 * @return mixed False if the job is not being monitored, otherwise the
+	 *  update timestamp.
+ 	 */
+	public function updated()
+	{
+		return $this->fetch('updated');
+ 	}
+
+	/**
+ 	 * Fetch the start timestamp of the job being monitored.
+ 	 *
+ 	 * @return mixed False if the job is not being monitored, otherwise the
+	 *  start timestamp.
+ 	 */
+	public function started()
+	{
+		return $this->fetch('started');
+ 	}
+
+	/**
+ 	 * Fetch the result of the job being monitored.
+ 	 *
+ 	 * @return mixed False if the job is not being monitored, otherwise the result
+ 	 * 	as mixed
+ 	 */
+	public function result()
+	{
+		return $this->fetch('result');
+ 	}
 
 	/**
 	 * Stop tracking the status of a job.
@@ -137,6 +190,35 @@ class Resque_Job_Status
 	 */
 	public function __toString()
 	{
-		return 'job:' . $this->id . ':status';
+		return 'job:' . $this->prefix . $this->id . ':status';
+	}
+
+	/**
+	* Fetch a value from the status packet for the job being monitored.
+	*
+	* @return mixed False if the status is not being monitored, otherwise the
+	*  requested value from the status packet.
+	*/
+	protected function fetch($value = null)
+	{
+		if(!$this->isTracking()) {
+			return false;
+		}
+
+		$statusPacket = json_decode(Resque::redis()->get((string)$this), true);
+		if(!$statusPacket) {
+			return false;
+		}
+
+		if(empty($value)) {
+			return $statusPacket;
+		} else {
+			if(isset($statusPacket[$value])) {
+				return $statusPacket[$value];
+			} else {
+				return null;
+			}
+		}
+
 	}
 }

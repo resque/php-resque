@@ -12,6 +12,11 @@ declare(ticks = 1);
 class Resque_Worker
 {
 	/**
+	 * @var string Prefix for the process name
+	 */
+	private static $processPrefix = 'resque';
+
+	/**
 	* @var LoggerInterface Logging object that impliments the PSR-3 LoggerInterface
 	*/
 	public $logger;
@@ -80,6 +85,15 @@ class Resque_Worker
 
         $this->id = $this->hostname . ':'.getmypid() . ':' . implode(',', $this->queues);
     }
+
+	/**
+	 * Set the process prefix of the workers to the given prefix string.
+	 * @param string $prefix The new process prefix
+	 */
+	public static function setProcessPrefix($prefix)
+	{
+		self::$processPrefix = $prefix;
+	}
 
 	/**
 	 * Return all workers known to Resque as instantiated instances.
@@ -152,9 +166,25 @@ class Resque_Worker
 		$this->updateProcLine('Starting');
 		$this->startup();
 
+        if(function_exists('pcntl_signal_dispatch')) {
+            pcntl_signal_dispatch();
+        }
+
 		while(true) {
 			if($this->shutdown) {
 				break;
+			}
+
+			// is redis still alive?
+			try {
+			    if (Resque::redis()->ping() === false) {
+			        throw new CredisException('redis ping() failed');
+			    }
+			} catch (CredisException $e) {
+			    $this->logger->log(Psr\Log\LogLevel::ERROR, 'redis went away. trying to reconnect');
+			    Resque::$redis = null;
+			    usleep($interval * 1000000);
+			    continue;
 			}
 
 			// Attempt to find and reserve a job
@@ -162,9 +192,9 @@ class Resque_Worker
 			if(!$this->paused) {
 				if($blocking === true) {
 					$this->logger->log(Psr\Log\LogLevel::INFO, 'Starting blocking with timeout of {interval}', array('interval' => $interval));
-					$this->updateProcLine('Waiting for ' . implode(',', $this->queues) . ' with blocking timeout ' . $interval);
+					$this->updateProcLine('Waiting with blocking timeout ' . $interval);
 				} else {
-					$this->updateProcLine('Waiting for ' . implode(',', $this->queues) . ' with interval ' . $interval);
+					$this->updateProcLine('Waiting with interval ' . $interval);
 				}
 
 				$job = $this->reserve($blocking, $interval);
@@ -184,7 +214,7 @@ class Resque_Worker
 						$this->updateProcLine('Paused');
 					}
 					else {
-						$this->updateProcLine('Waiting for ' . implode(',', $this->queues));
+						$this->updateProcLine('Waiting');
 					}
 
 					usleep($interval * 1000000);
@@ -199,12 +229,22 @@ class Resque_Worker
 
 			$this->child = Resque::fork();
 
-			// Forked and we're the child. Run the job.
-			if ($this->child === 0 || $this->child === false) {
+			// Forked and we're the child. Or PCNTL is not installed. Run the job.
+			if ($this->child === 0 || $this->child === false || $this->child === -1) {
 				$status = 'Processing ' . $job->queue . ' since ' . strftime('%F %T');
 				$this->updateProcLine($status);
 				$this->logger->log(Psr\Log\LogLevel::INFO, $status);
+
+				if(!empty($job->payload['id'])) {
+					Resque_Job_PID::create($job->payload['id']);
+				}
+
 				$this->perform($job);
+
+				if(!empty($job->payload['id'])) {
+					Resque_Job_PID::del($job->payload['id']);
+				}
+
 				if ($this->child === 0) {
 					exit(0);
 				}
@@ -217,7 +257,14 @@ class Resque_Worker
 				$this->logger->log(Psr\Log\LogLevel::INFO, $status);
 
 				// Wait until the child process finishes before continuing
-				pcntl_wait($status);
+				while (pcntl_wait($status, WNOHANG) === 0) {
+					if(function_exists('pcntl_signal_dispatch')) {
+			            pcntl_signal_dispatch();
+			        }
+
+					// Pause for a half a second to conserve system resources
+					usleep(500000);
+				}
 
 				if (pcntl_wifexited($status) !== true) {
 					$job->fail(new Resque_Job_DirtyExitException('Job exited abnormally'));
@@ -250,17 +297,23 @@ class Resque_Worker
 	 */
 	public function perform(Resque_Job $job)
 	{
+		$result = null;
 		try {
 			Resque_Event::trigger('afterFork', $job);
-			$job->perform();
+			$result = $job->perform();
 		}
 		catch(Exception $e) {
-			$this->logger->log(Psr\Log\LogLevel::CRITICAL, '{job} has failed {stack}', array('job' => $job, 'stack' => $e));
+			$this->logger->log(Psr\Log\LogLevel::CRITICAL, '{job} has failed {exception}', array('job' => $job, 'exception' => $e));
+			$job->fail($e);
+			return;
+		}
+		catch(Error $e) {
+			$this->logger->log(Psr\Log\LogLevel::CRITICAL, '{job} has failed {exception}', array('job' => $job, 'exception' => $e));
 			$job->fail($e);
 			return;
 		}
 
-		$job->updateStatus(Resque_Job_Status::STATUS_COMPLETE);
+		$job->updateStatus(Resque_Job_Status::STATUS_COMPLETE, $result);
 		$this->logger->log(Psr\Log\LogLevel::NOTICE, '{job} has finished', array('job' => $job));
 	}
 
@@ -283,6 +336,11 @@ class Resque_Worker
 		}
 
 		if($blocking === true) {
+		    if(empty($queues)){
+                $this->logger->log(Psr\Log\LogLevel::INFO, 'No queue was found, sleeping for {interval}', array('interval' => $timeout));
+                usleep($timeout * 1000000);
+                return false;
+            }
 			$job = Resque_Job::reserveBlocking($queues, $timeout);
 			if($job) {
 				$this->logger->log(Psr\Log\LogLevel::INFO, 'Found job on {queue}', array('queue' => $job->queue));
@@ -344,7 +402,7 @@ class Resque_Worker
 	 */
 	private function updateProcLine($status)
 	{
-		$processTitle = 'resque-' . Resque::VERSION . ': ' . $status;
+		$processTitle = static::$processPrefix . '-' . Resque::VERSION . ' (' . implode(',', $this->queues) . '): ' . $status;
 		if(function_exists('cli_set_process_title') && PHP_OS !== 'Darwin') {
 			cli_set_process_title($processTitle);
 		}
@@ -416,6 +474,13 @@ class Resque_Worker
 	}
 
 	/**
+	 * @return int Child process PID.
+	 */
+	public function getChildPID() {
+		return $this->child;
+	}
+
+	/**
 	 * Kill a forked child job immediately. The job it is processing will not
 	 * be completed.
 	 */
@@ -427,7 +492,7 @@ class Resque_Worker
 		}
 
 		$this->logger->log(Psr\Log\LogLevel::INFO, 'Killing child at {child}', array('child' => $this->child));
-		if(exec('ps -o pid,state -p ' . $this->child, $output, $returnCode) && $returnCode != 1) {
+		if(exec('ps -o pid,s -p ' . $this->child, $output, $returnCode) && $returnCode != 1) {
 			$this->logger->log(Psr\Log\LogLevel::DEBUG, 'Child {child} found, killing.', array('child' => $this->child));
 			posix_kill($this->child, SIGKILL);
 			$this->child = null;
@@ -471,9 +536,18 @@ class Resque_Worker
 	public function workerPids()
 	{
 		$pids = array();
-		exec('ps -A -o pid,command | grep [r]esque', $cmdOutput);
-		foreach($cmdOutput as $line) {
-			list($pids[],) = explode(' ', trim($line), 2);
+		if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+			exec('WMIC path win32_process get Processid,Commandline | findstr resque | findstr /V findstr', $cmdOutput);
+			foreach($cmdOutput as $line) {
+				$line = preg_replace('/\s+/m', ' ', $line);
+				list(,,$pids[]) = explode(' ', trim($line), 3);
+			}
+		}
+		else {
+			exec('ps -A -o pid,args | grep [r]esque', $cmdOutput);
+			foreach($cmdOutput as $line) {
+				list($pids[],) = explode(' ', trim($line), 2);
+			}
 		}
 		return $pids;
 	}
@@ -484,7 +558,7 @@ class Resque_Worker
 	public function registerWorker()
 	{
 		Resque::redis()->sadd('workers', (string)$this);
-		Resque::redis()->set('worker:' . (string)$this . ':started', strftime('%a %b %d %H:%M:%S %Z %Y'));
+		Resque::redis()->set('worker:' . (string)$this . ':started', date('c'));
 	}
 
 	/**
@@ -516,7 +590,7 @@ class Resque_Worker
 		$job->updateStatus(Resque_Job_Status::STATUS_RUNNING);
 		$data = json_encode(array(
 			'queue' => $job->queue,
-			'run_at' => strftime('%a %b %d %H:%M:%S %Z %Y'),
+			'run_at' => date('c'),
 			'payload' => $job->payload
 		));
 		Resque::redis()->set('worker:' . $job->worker, $data);

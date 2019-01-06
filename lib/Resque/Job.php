@@ -53,11 +53,12 @@ class Resque_Job
 	 * @param array $args Any optional arguments that should be passed when the job is executed.
 	 * @param boolean $monitor Set to true to be able to monitor the status of a job.
 	 * @param string $id Unique identifier for tracking the job. Generated if not supplied.
+	 * @param string $prefix The prefix needs to be set for the status key
 	 *
 	 * @return string
 	 * @throws \InvalidArgumentException
 	 */
-	public static function create($queue, $class, $args = null, $monitor = false, $id = null)
+	public static function create($queue, $class, $args = null, $monitor = false, $id = null, $prefix = "")
 	{
 		if (is_null($id)) {
 			$id = Resque::generateJobId();
@@ -69,14 +70,15 @@ class Resque_Job
 			);
 		}
 		Resque::push($queue, array(
-			'class'	=> $class,
-			'args'	=> array($args),
-			'id'	=> $id,
+			'class'	     => $class,
+			'args'	     => array($args),
+			'id'	     => $id,
+			'prefix'     => $prefix,
 			'queue_time' => microtime(true),
 		));
 
 		if($monitor) {
-			Resque_Job_Status::create($id);
+			Resque_Job_Status::create($id, $prefix);
 		}
 
 		return $id;
@@ -123,14 +125,14 @@ class Resque_Job
 	 *
 	 * @param int $status Status constant from Resque_Job_Status indicating the current status of a job.
 	 */
-	public function updateStatus($status)
+	public function updateStatus($status, $result = null)
 	{
 		if(empty($this->payload['id'])) {
 			return;
 		}
 
-		$statusInstance = new Resque_Job_Status($this->payload['id']);
-		$statusInstance->update($status);
+		$statusInstance = new Resque_Job_Status($this->payload['id'], $this->payload['prefix']);
+		$statusInstance->update($status, $result);
 	}
 
 	/**
@@ -140,7 +142,7 @@ class Resque_Job
 	 */
 	public function getStatus()
 	{
-		$status = new Resque_Job_Status($this->payload['id']);
+		$status = new Resque_Job_Status($this->payload['id'], $this->payload['prefix']);
 		return $status->get();
 	}
 
@@ -183,17 +185,18 @@ class Resque_Job
 	 */
 	public function perform()
 	{
+		$result = true;
 		try {
 			Resque_Event::trigger('beforePerform', $this);
 
 			$instance = $this->getInstance();
-			if(method_exists($instance, 'setUp')) {
+			if(is_callable([$instance, 'setUp'])) {
 				$instance->setUp();
 			}
 
-			$instance->perform();
+			$result = $instance->perform();
 
-			if(method_exists($instance, 'tearDown')) {
+			if(is_callable([$instance, 'tearDown'])) {
 				$instance->tearDown();
 			}
 
@@ -201,10 +204,10 @@ class Resque_Job
 		}
 		// beforePerform/setUp have said don't perform this job. Return.
 		catch(Resque_Job_DontPerform $e) {
-			return false;
+			$result = false;
 		}
 
-		return true;
+		return $result;
 	}
 
 	/**
@@ -220,12 +223,21 @@ class Resque_Job
 		));
 
 		$this->updateStatus(Resque_Job_Status::STATUS_FAILED);
-		Resque_Failure::create(
-			$this->payload,
-			$exception,
-			$this->worker,
-			$this->queue
-		);
+		if ($exception instanceof Error) {
+			Resque_Failure::createFromError(
+				$this->payload,
+				$exception,
+				$this->worker,
+				$this->queue
+			);
+		} else {
+			Resque_Failure::create(
+				$this->payload,
+				$exception,
+				$this->worker,
+				$this->queue
+			);
+		}
 		Resque_Stat::incr('failed');
 		Resque_Stat::incr('failed:' . $this->worker);
 	}
@@ -236,13 +248,13 @@ class Resque_Job
 	 */
 	public function recreate()
 	{
-		$status = new Resque_Job_Status($this->payload['id']);
+		$status = new Resque_Job_Status($this->payload['id'], $this->payload['prefix']);
 		$monitor = false;
 		if($status->isTracking()) {
 			$monitor = true;
 		}
 
-		return self::create($this->queue, $this->payload['class'], $this->getArguments(), $monitor);
+		return self::create($this->queue, $this->payload['class'], $this->getArguments(), $monitor, $this->payload['prefix']);
 	}
 
 	/**

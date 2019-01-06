@@ -113,11 +113,14 @@ class Resque_Redis
     public function __construct($server, $database = null, $client = null)
 	{
 		try {
-			if (is_array($server)) {
-				$this->driver = new Credis_Cluster($server);
-			}
-			else if (is_object($client)) {
+			if (is_object($client)) {
 				$this->driver = $client;
+			}
+			elseif (is_object($server)) {
+				$this->driver = $server;
+			}
+			elseif (is_array($server)) {
+				$this->driver = new Credis_Cluster($server);
 			}
 			else {
 				list($host, $port, $dsnDatabase, $user, $password, $options) = self::parseDsn($server);
