@@ -36,6 +36,8 @@ It also supports the following additional features:
 -   Has built in support for `setUp` and `tearDown` methods, called pre and post
     jobs
 
+This port is originally based on the works of Chris Boulton et al, see <https://github.com/chrisboulton/php-resque>
+
 ## Requirements
 
 -   PHP 5.3+
@@ -274,6 +276,15 @@ custom prefix to separate the Resque data:
 
 ```sh
 $ PREFIX=my-app-name bin/resque
+```
+
+### Setting Redis backend ###
+
+When you have the Redis database on a different host than the one the workers 
+are running, you must set the `REDIS_BACKEND` environment variable:
+
+```sh
+$ REDIS_BACKEND=my-redis-ip:my-redis-port bin/resque
 ```
 
 ### Forking
