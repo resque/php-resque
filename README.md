@@ -23,7 +23,7 @@ jobs on one or more queues, and processing them later.
 [![Maintenance Status](https://img.shields.io/maintenance/yes/2019.svg?style=flat-square&logo=github&logoColor=white)](https://github.com/resque/php-resque)
 
 [![Contributors](https://img.shields.io/github/contributors/resque/php-resque.svg?style=flat-square&logo=github&logoColor=white)](https://github.com/resque/php-resque)
-[![Chat on Slack](https://img.shields.io/badge/chat-Slack-blue.svg?style=flat-square&logo=slack&logoColor=white)](https://join.slack.com/t/php-resque/shared_invite/enQtNTE3MTkwOTkwMzg0LWVlNTFkZTBhMjI3NjA4Yzk3YzUxZDZkNDczMTA4OTE4NmY0NmZlYzQ2ZjJjZWRlM2M1YzZkNDIwNGNlNjgyZTE)
+[![Chat on Slack](https://img.shields.io/badge/chat-Slack-blue.svg?style=flat-square&logo=slack&logoColor=white)](https://join.slack.com/t/php-resque/shared_invite/enQtNTIwODk0OTc1Njg3LWYyODczMTZjMzI2N2JkYWUzM2FlNDk5ZjY2ZGM4Njc4YjFiMzU2ZWFjOGQxMDIyNmE5MTBlNWEzODBiMmVmOTI)
 
 ## Background
 
