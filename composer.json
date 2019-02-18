@@ -45,7 +45,8 @@
 	],
 	"autoload": {
 		"psr-0": {
-			"Resque": "lib"
+			"Resque": "lib",
+			"ResqueScheduler": "lib"
 		}
     },
     "extra": {
