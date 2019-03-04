@@ -92,6 +92,13 @@ class Resque_Redis
 	// mset
 	// renamenx
 
+	private $scanCommands = array(
+		'scan',
+		'hscan',
+		'sscan',
+		'zscan',
+	);
+
 	/**
 	 * Set Redis namespace (prefix) default: resque
 	 * @param string $namespace
@@ -244,6 +251,9 @@ class Resque_Redis
 			else {
 				$args[0] = self::$defaultNamespace . $args[0];
 			}
+		} elseif (in_array($name, $this->scanCommands)) {
+			// fix scan cursor to be a reference.
+			$args[0] = &$args[0];
 		}
 		try {
 			return $this->driver->__call($name, $args);
