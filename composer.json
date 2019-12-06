@@ -41,7 +41,8 @@
 		"phpunit/phpunit": "3.7.*"
 	},
 	"bin": [
-		"bin/resque"
+		"bin/resque",
+		"bin/resque-scheduler"
 	],
 	"autoload": {
 		"psr-0": {
