@@ -28,6 +28,11 @@ class Resque
 	 */
 	protected static $redisDatabase = 0;
 
+    /**
+     * @var string auth of Redis database
+     */
+	protected static $auth;
+
 	/**
 	 * Given a host/port combination separated by a colon, set it as
 	 * the redis server that Resque will talk to.
@@ -37,11 +42,13 @@ class Resque
 	 *                      and returns a Resque_Redis instance, or
 	 *                      a nested array of servers with host/port pairs.
 	 * @param int $database
+     * @param string $auth
 	 */
-	public static function setBackend($server, $database = 0)
+	public static function setBackend($server, $database = 0, $auth = null)
 	{
 		self::$redisServer   = $server;
 		self::$redisDatabase = $database;
+		self::$auth          = $auth;
 		self::$redis         = null;
 	}
 
@@ -61,6 +68,10 @@ class Resque
 		} else {
 			self::$redis = new Resque_Redis(self::$redisServer, self::$redisDatabase);
 		}
+
+		if (!empty(self::$auth)) {
+            self::$redis->auth(self::$auth);
+        }
 
 		return self::$redis;
 	}
@@ -141,9 +152,9 @@ class Resque
 	public static function dequeue($queue, $items = Array())
 	{
 	    if(count($items) > 0) {
-		return self::removeItems($queue, $items);
+			return self::removeItems($queue, $items);
 	    } else {
-		return self::removeList($queue);
+			return self::removeList($queue);
 	    }
 	}
 
@@ -213,10 +224,11 @@ class Resque
 	 * @param string $class The name of the class that contains the code to execute the job.
 	 * @param array $args Any optional arguments that should be passed when the job is executed.
 	 * @param boolean $trackStatus Set to true to be able to monitor the status of a job.
+	 * @param string $prefix The prefix needs to be set for the status key
 	 *
 	 * @return string|boolean Job ID when the job was created, false if creation was cancelled due to beforeEnqueue
 	 */
-	public static function enqueue($queue, $class, $args = null, $trackStatus = false)
+	public static function enqueue($queue, $class, $args = null, $trackStatus = false, $prefix = "")
 	{
 		$id         = Resque::generateJobId();
 		$hookParams = array(
@@ -232,7 +244,7 @@ class Resque
 			return false;
 		}
 
-		Resque_Job::create($queue, $class, $args, $trackStatus, $id);
+		Resque_Job::create($queue, $class, $args, $trackStatus, $id, $prefix);
 		Resque_Event::trigger('afterEnqueue', $hookParams);
 
 		return $id;
@@ -261,6 +273,20 @@ class Resque
 			$queues = array();
 		}
 		return $queues;
+	}
+
+	/**
+	 * Retrieve all the items of a queue with Redis
+	 *
+	 * @return array Array of items.
+	 */
+	public static function items($queue, $start = 0, $stop = -1)
+	{
+		$list = self::redis()->lrange('queue:' . $queue, $start, $stop);
+		if(!is_array($list)) {
+			$list = array();
+		}
+		return $list;
 	}
 
 	/**
@@ -317,7 +343,7 @@ class Resque
 
 	/**
 	 * matching item
-	 * item can be ['class'] or ['class' => 'id'] or ['class' => {:foo => 1, :bar => 2}]
+	 * item can be ['class'] or ['class' => 'id'] or ['class' => {'foo' => 1, 'bar' => 2}]
 	 * @private
 	 *
 	 * @params string $string redis result in json
@@ -330,24 +356,24 @@ class Resque
 	    $decoded = json_decode($string, true);
 
 	    foreach($items as $key => $val) {
-		# class name only  ex: item[0] = ['class']
-		if (is_numeric($key)) {
-		    if($decoded['class'] == $val) {
-			return true;
-		    }
-		# class name with args , example: item[0] = ['class' => {'foo' => 1, 'bar' => 2}]
-    		} elseif (is_array($val)) {
-		    $decodedArgs = (array)$decoded['args'][0];
-		    if ($decoded['class'] == $key &&
-			count($decodedArgs) > 0 && count(array_diff($decodedArgs, $val)) == 0) {
-			return true;
+			# class name only  ex: item[0] = ['class']
+			if (is_numeric($key)) {
+			    if($decoded['class'] == $val) {
+					return true;
+			    }
+			# class name with args , example: item[0] = ['class' => {'foo' => 1, 'bar' => 2}]
+			} elseif (is_array($val)) {
+			    $decodedArgs = (array)$decoded['args'][0];
+			    if ($decoded['class'] == $key &&
+					count($decodedArgs) > 0 && count(array_diff($decodedArgs, $val)) == 0) {
+					return true;
+				}
+			# class name with ID, example: item[0] = ['class' => 'id']
+			} else {
+			    if ($decoded['class'] == $key && $decoded['id'] == $val) {
+					return true;
+			    }
 			}
-		# class name with ID, example: item[0] = ['class' => 'id']
-		} else {
-		    if ($decoded['class'] == $key && $decoded['id'] == $val) {
-			return true;
-		    }
-		}
 	    }
 	    return false;
 	}
