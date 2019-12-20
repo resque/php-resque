@@ -12,7 +12,6 @@ jobs on one or more queues, and processing them later.
 [![Downloads](https://img.shields.io/packagist/dt/resque/php-resque.svg?style=flat-square)](https://packagist.org/packages/resque/php-resque)
 
 [![Build Status](https://img.shields.io/travis/resque/php-resque.svg?style=flat-square&logo=travis)](http://travis-ci.org/resque/php-resque)
-[![Tested With HHVM](https://img.shields.io/hhvm/resque/php-resque.svg?style=flat-square)](http://travis-ci.org/resque/php-resque)
 [![Code Quality](https://img.shields.io/scrutinizer/g/resque/php-resque.svg?style=flat-square&logo=scrutinizer)](https://scrutinizer-ci.com/g/resque/php-resque/)
 [![Code Coverage](https://img.shields.io/scrutinizer/coverage/g/resque/php-resque.svg?style=flat-square&logo=scrutinizer)](https://scrutinizer-ci.com/g/resque/php-resque/)
 [![Dependency Status](https://img.shields.io/librariesio/github/resque/php-resque.svg?style=flat-square)](https://libraries.io/github/resque/php-resque)
@@ -20,7 +19,7 @@ jobs on one or more queues, and processing them later.
 [![Latest Release](https://img.shields.io/github/release/resque/php-resque.svg?style=flat-square&logo=github&logoColor=white)](https://github.com/resque/php-resque)
 [![Latest Release Date](https://img.shields.io/github/release-date/resque/php-resque.svg?style=flat-square&logo=github&logoColor=white)](https://github.com/resque/php-resque)
 [![Commits Since Latest Release](https://img.shields.io/github/commits-since/resque/php-resque/latest.svg?style=flat-square&logo=github&logoColor=white)](https://github.com/resque/php-resque)
-[![Maintenance Status](https://img.shields.io/maintenance/yes/2019.svg?style=flat-square&logo=github&logoColor=white)](https://github.com/resque/php-resque)
+[![Maintenance Status](https://img.shields.io/maintenance/yes/2020.svg?style=flat-square&logo=github&logoColor=white)](https://github.com/resque/php-resque)
 
 [![Contributors](https://img.shields.io/github/contributors/resque/php-resque.svg?style=flat-square&logo=github&logoColor=white)](https://github.com/resque/php-resque)
 [![Chat on Slack](https://img.shields.io/badge/chat-Slack-blue.svg?style=flat-square&logo=slack&logoColor=white)](https://join.slack.com/t/php-resque/shared_invite/enQtNTIwODk0OTc1Njg3LWYyODczMTZjMzI2N2JkYWUzM2FlNDk5ZjY2ZGM4Njc4YjFiMzU2ZWFjOGQxMDIyNmE5MTBlNWEzODBiMmVmOTI)
@@ -361,7 +360,7 @@ $ PREFIX=my-app-name bin/resque
 
 ### Setting Redis backend ###
 
-When you have the Redis database on a different host than the one the workers 
+When you have the Redis database on a different host than the one the workers
 are running, you must set the `REDIS_BACKEND` environment variable:
 
 ```sh
