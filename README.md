@@ -56,6 +56,15 @@ It also supports the following additional features:
 -   Has built in support for `setUp` and `tearDown` methods, called pre and post
     jobs
 
+Additionally it includes php-resque-scheduler, a PHP port of [resque-scheduler](http://github.com/resque/resque),
+which adds support for scheduling items in the future to Resque. It has been
+designed to be an almost direct-copy of the Ruby plugin
+
+At the moment, php-resque-scheduler only supports delayed jobs, which is the
+ability to push a job to the queue and have it run at a certain timestamp, or
+in a number of seconds. Support for recurring jobs (similar to CRON) is planned
+for a future release.
+
 This port was originally made by [Chris
 Boulton](https://github.com/chrisboulton), with maintenance by the community.
 See <https://github.com/chrisboulton/php-resque> for more on that history.
@@ -218,6 +227,43 @@ echo Resque_Job_PID::get($token);
 
 Function returns `0` if the `perform` hasn't started yet, or if it has already ended.
 
+## Delayed Jobs
+
+To quote the documentation for the Ruby resque-scheduler:
+
+> Delayed jobs are one-off jobs that you want to be put into a queue at some
+point in the future. The classic example is sending an email:
+
+    require 'Resque/Resque.php';
+    require 'ResqueScheduler/ResqueScheduler.php';
+
+    $in = 3600;
+    $args = array('id' => $user->id);
+    ResqueScheduler::enqueueIn($in, 'email', 'SendFollowUpEmail', $args);
+
+The above will store the job for 1 hour in the delayed queue, and then pull the
+job off and submit it to the `email` queue in Resque for processing as soon as
+a worker is available.
+
+Instead of passing a relative time in seconds, you can also supply a timestamp
+as either a DateTime object or integer containing a UNIX timestamp to the
+`enqueueAt` method:
+
+    require 'Resque/Resque.php';
+    require 'ResqueScheduler/ResqueScheduler.php';
+
+    $time = 1332067214;
+    ResqueScheduler::enqueueAt($time, 'email', 'SendFollowUpEmail', $args);
+
+    $datetime = new DateTime('2012-03-18 13:21:49');
+    ResqueScheduler::enqueueAt($datetime, 'email', 'SendFollowUpEmail', $args);
+
+NOTE: resque-scheduler does not guarantee a job will fire at the time supplied.
+At the time supplied, resque-scheduler will take the job out of the delayed
+queue and push it to the appropriate queue in Resque. Your next available Resque
+worker will pick the job up. To keep processing as quick as possible, keep your
+queues as empty as possible.
+
 ## Workers
 
 Workers work in the exact same way as the Ruby workers. For complete
@@ -355,6 +401,29 @@ functionality to PHP before 5.5, so if you'd like process titles updated,
 install the PECL module as well. php-resque will automatically detect and use
 it.
 
+### Resque Scheduler
+
+resque-scheduler requires a special worker that runs in the background. This
+worker is responsible for pulling items off the schedule/delayed queue and adding
+them to the queue for resque. This means that for delayed or scheduled jobs to be
+executed, that worker needs to be running.
+
+A basic "up-and-running" `bin/resque-scheduler` file that sets up a
+running worker environment is included (`vendor/bin/resque-scheduler` when
+installed via composer). It accepts many of the same environment variables as
+the main workers for php-resque:
+
+* `REDIS_BACKEND` - Redis server to connect to
+* `LOGGING` - Enable logging to STDOUT
+* `VERBOSE` - Enable verbose logging
+* `VVERBOSE` - Enable very verbose logging
+* `INTERVAL` - Sleep for this long before checking scheduled/delayed queues
+* `APP_INCLUDE` - Include this file when starting (to launch your app)
+* `PIDFILE` - Write the PID of the worker out to this file
+
+It's easy to start the resque-scheduler worker using `bin/resque-scheduler`:
+    $ php bin/resque-scheduler
+
 ## Event/Hook System
 
 php-resque has a basic event system that can be used by your application to
@@ -462,6 +531,17 @@ passed (in this order) include:
 -   Queue - string containing the name of the queue the job was added to
 -   ID - string containing the new token of the enqueued job
 
+### afterSchedule
+
+Called after a job has been added to the schedule. Arguments passed are the
+timestamp, queue of the job, the class name of the job, and the job's arguments.
+
+### beforeDelayedEnqueue
+
+Called immediately after a job has been pulled off the delayed queue and right
+before the job is added to the queue in resque. Arguments passed are the queue
+of the job, the class name of the job, and the job's arguments.
+
 ## Step-By-Step
 
 For a more in-depth look at what php-resque does under the hood (without needing
@@ -486,6 +566,7 @@ to directly examine the code), have a look at `HOWITWORKS.md`.
 -   @andrewjshults
 -   @atorres757
 -   @benjisg
+-   @biinari
 -   @cballou
 -   @chaitanyakuber
 -   @charly22
@@ -511,6 +592,7 @@ to directly examine the code), have a look at `HOWITWORKS.md`.
 -   @patrickbajao
 -   @pedroarnal
 -   @ptrofimov
+-   @rayward
 -   @richardkmiller
 -   @Rockstar04
 -   @ruudk
