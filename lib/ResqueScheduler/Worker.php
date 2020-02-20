@@ -1,4 +1,6 @@
 <?php
+declare(ticks = 1);
+
 /**
  * ResqueScheduler worker to handle scheduling of delayed tasks.
  *
@@ -22,7 +24,12 @@ class ResqueScheduler_Worker
 	 * @var int Interval to sleep for between checking schedules.
 	 */
 	protected $interval = 5;
-	
+
+    /**
+     * @var boolean True if on the next iteration, the worker should shutdown.
+     */
+    private $shutdown = false;
+
 	/**
 	* The primary loop for a worker.
 	*
@@ -38,8 +45,12 @@ class ResqueScheduler_Worker
 		}
 
 		$this->updateProcLine('Starting');
-		
-		while (true) {
+		$this->registerSigHandlers();
+
+        while (true) {
+            if($this->shutdown) {
+                break;
+            }
 			$this->handleDelayedItems();
 			$this->sleep();
 		}
@@ -124,4 +135,27 @@ class ResqueScheduler_Worker
 			fwrite(STDOUT, "** [" . strftime('%T %Y-%m-%d') . "] " . $message . "\n");
 		}
 	}
+
+    /**
+     * Register signal handlers that a worker should respond to.
+     *
+     * TERM: Shutdown immediately and stop processing jobs.
+     * INT: Shutdown immediately and stop processing jobs.
+     * QUIT: Shutdown after the current job finishes processing.
+     */
+    private function registerSigHandlers()
+    {
+        if(!function_exists('pcntl_signal')) {
+            return;
+        }
+
+        pcntl_signal(SIGTERM, array($this, 'shutdown'));
+        pcntl_signal(SIGINT, array($this, 'shutdown'));
+        pcntl_signal(SIGQUIT, array($this, 'shutdown'));
+    }
+
+    public function shutdown()
+    {
+        $this->shutdown = true;
+    }
 }
