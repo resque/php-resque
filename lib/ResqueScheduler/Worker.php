@@ -139,9 +139,9 @@ class ResqueScheduler_Worker
 	/**
 	 * Register signal handlers that a worker should respond to.
 	 *
-	 * TERM: Shutdown immediately and stop processing jobs.
-	 * INT: Shutdown immediately and stop processing jobs.
-	 * QUIT: Shutdown after the current job finishes processing.
+	 * TERM: Shutdown after the current timestamp was processed.
+	 * INT: Shutdown after the current timestamp was processed.
+	 * QUIT: Shutdown after the current timestamp was processed.
 	 */
 	private function registerSigHandlers()
 	{
