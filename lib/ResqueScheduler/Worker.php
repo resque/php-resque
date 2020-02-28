@@ -31,6 +31,11 @@ class ResqueScheduler_Worker
 	private $shutdown = false;
 
 	/**
+	 * @var boolean True if this worker is paused.
+	 */
+	private $paused = false;
+
+	/**
 	* The primary loop for a worker.
 	*
 	* Every $interval (seconds), the scheduled queue will be checked for jobs
@@ -51,7 +56,9 @@ class ResqueScheduler_Worker
 			if($this->shutdown) {
 				break;
 			}
-			$this->handleDelayedItems();
+			if(!$this->paused) {
+				$this->handleDelayedItems();
+			}
 			$this->sleep();
 		}
 	}
@@ -152,10 +159,33 @@ class ResqueScheduler_Worker
 		pcntl_signal(SIGTERM, array($this, 'shutdown'));
 		pcntl_signal(SIGINT, array($this, 'shutdown'));
 		pcntl_signal(SIGQUIT, array($this, 'shutdown'));
+		pcntl_signal(SIGUSR2, array($this, 'pauseProcessing'));
+		pcntl_signal(SIGCONT, array($this, 'unPauseProcessing'));
+
+		$this->log('Registered signals');
 	}
 
 	public function shutdown()
 	{
+		$this->log('Shutting down');
 		$this->shutdown = true;
+	}
+
+	/**
+	 * Signal handler callback for USR2, pauses processing.
+	 */
+	public function pauseProcessing()
+	{
+		$this->log('USR2 received; pausing processing');
+		$this->paused = true;
+	}
+
+	/**
+	 * Signal handler callback for CONT, resume processing.
+	 */
+	public function unPauseProcessing()
+	{
+		$this->log('CONT received; resuming processing');
+		$this->paused = false;
 	}
 }
