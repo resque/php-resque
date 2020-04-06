@@ -131,18 +131,22 @@ class Resque_Job
 			return;
 		}
 
-		$statusInstance = new Resque_Job_Status($this->payload['id'], $this->payload['prefix']);
+		$statusInstance = new Resque_Job_Status($this->payload['id'], $this->getPrefix());
 		$statusInstance->update($status, $result);
 	}
 
 	/**
 	 * Return the status of the current job.
 	 *
-	 * @return int The status of the job as one of the Resque_Job_Status constants.
+	 * @return int|null The status of the job as one of the Resque_Job_Status constants or null if job is not being tracked.
 	 */
 	public function getStatus()
 	{
-		$status = new Resque_Job_Status($this->payload['id'], $this->payload['prefix']);
+		if(empty($this->payload['id'])) {
+			return null;
+		}
+
+		$status = new Resque_Job_Status($this->payload['id'], $this->getPrefix());
 		return $status->get();
 	}
 
@@ -248,13 +252,15 @@ class Resque_Job
 	 */
 	public function recreate()
 	{
-		$status = new Resque_Job_Status($this->payload['id'], $this->payload['prefix']);
 		$monitor = false;
-		if($status->isTracking()) {
-			$monitor = true;
+		if (isset($this->payload['id'])) {
+			$status = new Resque_Job_Status($this->payload['id'], $this->getPrefix());
+			if($status->isTracking()) {
+				$monitor = true;
+			}
 		}
 
-		return self::create($this->queue, $this->payload['class'], $this->getArguments(), $monitor, $this->payload['prefix']);
+		return self::create($this->queue, $this->payload['class'], $this->getArguments(), $monitor, null, $this->getPrefix());
 	}
 
 	/**
@@ -297,5 +303,17 @@ class Resque_Job
             $this->jobFactory = new Resque_Job_Factory();
         }
         return $this->jobFactory;
+    }
+
+    /**
+     * @return string
+     */
+    private function getPrefix()
+    {
+    	if (isset($this->payload['prefix'])) {
+    		return $this->payload['prefix'];
+    	}
+
+    	return '';
     }
 }
