@@ -175,9 +175,9 @@ class Resque_Job
 			return $this->instance;
 		}
 
-        $this->instance = $this->getJobFactory()->create($this->payload['class'], $this->getArguments(), $this->queue);
-        $this->instance->job = $this;
-        return $this->instance;
+		$this->instance = $this->getJobFactory()->create($this->payload['class'], $this->getArguments(), $this->queue);
+		$this->instance->job = $this;
+		return $this->instance;
 	}
 
 	/**
@@ -294,26 +294,26 @@ class Resque_Job
 		return $this;
 	}
 
-    /**
-     * @return Resque_Job_FactoryInterface
-     */
-    public function getJobFactory()
-    {
-        if ($this->jobFactory === null) {
-            $this->jobFactory = new Resque_Job_Factory();
-        }
-        return $this->jobFactory;
-    }
+	/**
+	 * @return Resque_Job_FactoryInterface
+	 */
+	public function getJobFactory()
+	{
+		if ($this->jobFactory === null) {
+			$this->jobFactory = new Resque_Job_Factory();
+		}
+		return $this->jobFactory;
+	}
 
-    /**
-     * @return string
-     */
-    private function getPrefix()
-    {
-    	if (isset($this->payload['prefix'])) {
-    		return $this->payload['prefix'];
-    	}
+	/**
+	 * @return string
+	 */
+	private function getPrefix()
+	{
+		if (isset($this->payload['prefix'])) {
+			return $this->payload['prefix'];
+		}
 
-    	return '';
-    }
+		return '';
+	}
 }
