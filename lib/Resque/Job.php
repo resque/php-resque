@@ -253,7 +253,7 @@ class Resque_Job
 	public function recreate()
 	{
 		$monitor = false;
-		if (isset($this->payload['id'])) {
+		if (!empty($this->payload['id'])) {
 			$status = new Resque_Job_Status($this->payload['id'], $this->getPrefix());
 			if($status->isTracking()) {
 				$monitor = true;
