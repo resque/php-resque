@@ -416,6 +416,30 @@ class Resque_Tests_JobTest extends Resque_Tests_TestCase
 		$instance = $job->getInstance();
 		$this->assertInstanceOf('Resque_JobInterface', $instance);
 	}
+
+	public function testJobStatusIsNullIfIdMissingFromPayload()
+	{
+		$payload = array(
+			'class' => 'Some_Job_Class',
+			'args' => null
+		);
+		$job = new Resque_Job('jobs', $payload);
+		$this->assertEquals(null, $job->getStatus());
+	}
+
+	public function testJobCanBeRecreatedFromLegacyPayload()
+	{
+		$payload = array(
+			'class' => 'Some_Job_Class',
+			'args' => null
+		);
+		$job = new Resque_Job('jobs', $payload);
+		$job->recreate();
+		$newJob = Resque_Job::reserve('jobs');
+		$this->assertEquals('jobs', $newJob->queue);
+		$this->assertEquals('Some_Job_Class', $newJob->payload['class']);
+		$this->assertNotNull($newJob->payload['id']);
+	}
 }
 
 class Some_Job_Class implements Resque_JobInterface
