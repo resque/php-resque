@@ -207,15 +207,28 @@ class Resque_Redis
 			$database = intval(preg_replace('/[^0-9]/', '', $parts['path']));
 		}
 
-		// Extract any 'user' and 'pass' values
+		// Extract any 'user' values
 		$user = isset($parts['user']) ? $parts['user'] : false;
-		$pass = isset($parts['pass']) ? $parts['pass'] : false;
 
 		// Convert the query string into an associative array
 		$options = array();
 		if (isset($parts['query'])) {
 			// Parse the query string into an array
 			parse_str($parts['query'], $options);
+		}
+
+		//check 'password-encoding' parameter and extracting password based on encoding
+		if($options && isset($options['password-encoding']) && $options['password-encoding'] === 'u'){
+			//extracting urlencoded password
+			$pass = isset($parts['pass']) ? urldecode($parts['pass']) : false;
+		}
+		else if($options && isset($options['password-encoding']) && $options['password-encoding'] === 'b'){
+			//extracting base64 encoded password
+			$pass = isset($parts['pass']) ? base64_decode($parts['pass']) : false;
+		}
+		else{
+			//extracting pass directly since 'password-encoding' parameter is not present
+			$pass = isset($parts['pass']) ? $parts['pass'] : false;
 		}
 
 		return array(
