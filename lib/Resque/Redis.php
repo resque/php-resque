@@ -217,17 +217,17 @@ class Resque_Redis
 			parse_str($parts['query'], $options);
 		}
 
-		//check 'password-hashing' parameter and extracting password based on encoding
-		if($options && isset($options['password-hashing']) && $options['password-hashing'] === 'u'){
+		//check 'password-encoding' parameter and extracting password based on encoding
+		if($options && isset($options['password-encoding']) && $options['password-encoding'] === 'u'){
 			//extracting urlencoded password
 			$pass = isset($parts['pass']) ? urldecode($parts['pass']) : false;
 		}
-		else if($options && isset($options['password-hashing']) && $options['password-hashing'] === 'b'){
+		else if($options && isset($options['password-encoding']) && $options['password-encoding'] === 'b'){
 			//extracting base64 encoded password
 			$pass = isset($parts['pass']) ? base64_decode($parts['pass']) : false;
 		}
 		else{
-			//extracting pass directly since 'password-hashing' parameter is not present
+			//extracting pass directly since 'password-encoding' parameter is not present
 			$pass = isset($parts['pass']) ? $parts['pass'] : false;
 		}
 
