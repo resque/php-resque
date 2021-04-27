@@ -94,11 +94,11 @@ class ResqueScheduler_Worker
 			$this->log('queueing ' . $item['class'] . ' in ' . $item['queue'] .' [delayed]');
 
 			Resque_Event::trigger('beforeDelayedEnqueue', array(
-                array(
-                    'queue' => $item['queue'],
-                    'class' => $item['class'],
-                    'args'  => $item['args'],
-                )
+				array(
+					'queue' => $item['queue'],
+					'class' => $item['class'],
+					'args'  => $item['args'],
+				)
             ));
 
 			$payload = array_merge(array($item['queue'], $item['class']), $item['args']);

@@ -47,12 +47,12 @@ class ResqueScheduler
 		self::delayedPush($at, $job);
 
 		Resque_Event::trigger('afterSchedule', array(
-            array(
-                'at'    => $at,
-                'queue' => $queue,
-                'class' => $class,
-                'args'  => $args,
-            )
+			array(
+				'at'    => $at,
+				'queue' => $queue,
+				'class' => $class,
+				'args'  => $args,
+			)
         ));
 	}
 
