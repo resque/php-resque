@@ -177,7 +177,7 @@ class Resque_Worker
 
 			// is redis still alive?
 			try {
-			    if (Resque::redis()->ping() === false) {
+			    if (!$this->paused && Resque::redis()->ping() === false) {
 			        throw new CredisException('redis ping() failed');
 			    }
 			} catch (CredisException $e) {
