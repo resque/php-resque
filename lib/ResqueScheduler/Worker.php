@@ -14,12 +14,12 @@ class ResqueScheduler_Worker
 	const LOG_NONE = 0;
 	const LOG_NORMAL = 1;
 	const LOG_VERBOSE = 2;
-	
+
 	/**
 	 * @var int Current log level of this worker.
 	 */
 	public $logLevel = 0;
-	
+
 	/**
 	 * @var int Interval to sleep for between checking schedules.
 	 */
@@ -62,7 +62,7 @@ class ResqueScheduler_Worker
 			$this->sleep();
 		}
 	}
-	
+
 	/**
 	 * Handle delayed items for the next scheduled timestamp.
 	 *
@@ -78,7 +78,7 @@ class ResqueScheduler_Worker
 			$this->enqueueDelayedItemsForTimestamp($oldestJobTimestamp);
 		}
 	}
-	
+
 	/**
 	 * Schedule all of the delayed jobs for a given timestamp.
 	 *
@@ -92,18 +92,20 @@ class ResqueScheduler_Worker
 		$item = null;
 		while ($item = ResqueScheduler::nextItemForTimestamp($timestamp)) {
 			$this->log('queueing ' . $item['class'] . ' in ' . $item['queue'] .' [delayed]');
-			
+
 			Resque_Event::trigger('beforeDelayedEnqueue', array(
-				'queue' => $item['queue'],
-				'class' => $item['class'],
-				'args'  => $item['args'],
-			));
+                array(
+                    'queue' => $item['queue'],
+                    'class' => $item['class'],
+                    'args'  => $item['args'],
+                )
+            ));
 
 			$payload = array_merge(array($item['queue'], $item['class']), $item['args']);
 			call_user_func_array('Resque::enqueue', $payload);
 		}
 	}
-	
+
 	/**
 	 * Sleep for the defined interval.
 	 */
@@ -111,7 +113,7 @@ class ResqueScheduler_Worker
 	{
 		sleep($this->interval);
 	}
-	
+
 	/**
 	 * Update the status of the current worker process.
 	 *
@@ -127,7 +129,7 @@ class ResqueScheduler_Worker
 			setproctitle('resque-scheduler-' . ResqueScheduler::VERSION . ': ' . $status);
 		}
 	}
-	
+
 	/**
 	 * Output a given log message to STDOUT.
 	 *
