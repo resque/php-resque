@@ -13,13 +13,14 @@ class Resque
     const DEFAULT_INTERVAL = 5;
 
 	/**
-	 * @var Resque_Redis Instance of Resque_Redis that talks to redis.
+	 * @var Resque_Redis Instance of Resque_Redis that talks to redis or 
+	 *      external Redis connection object.
 	 */
 	public static $redis = null;
 
 	/**
 	 * @var mixed Host/port conbination separated by a colon, or a nested
-	 * array of server swith host/port pairs
+	 * array of server swith host/port pairs, or external Redis connection object
 	 */
 	protected static $redisServer = null;
 
@@ -40,7 +41,8 @@ class Resque
 	 * @param mixed $server Host/port combination separated by a colon, DSN-formatted URI, or
 	 *                      a callable that receives the configured database ID
 	 *                      and returns a Resque_Redis instance, or
-	 *                      a nested array of servers with host/port pairs.
+	 *                      a nested array of servers with host/port pairs or 
+	 *                      external Redis connection object.
 	 * @param int $database
      * @param string $auth
 	 */
@@ -53,7 +55,8 @@ class Resque
 	}
 
 	/**
-	 * Return an instance of the Resque_Redis class instantiated for Resque.
+	 * Return an instance of the Resque_Redis class instantiated for Resque or 
+	 * external Redis connection object.
 	 *
 	 * @return Resque_Redis Instance of Resque_Redis.
 	 */
@@ -63,7 +66,9 @@ class Resque
 			return self::$redis;
 		}
 
-		if (is_callable(self::$redisServer)) {
+		if (is_object(self::$redisServer)) {
+            		return self::$redisServer;
+        	} elseif (is_callable(self::$redisServer)) {
 			self::$redis = call_user_func(self::$redisServer, self::$redisDatabase);
 		} else {
 			self::$redis = new Resque_Redis(self::$redisServer, self::$redisDatabase);
