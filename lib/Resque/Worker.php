@@ -17,7 +17,7 @@ class Resque_Worker
 	private static $processPrefix = 'resque';
 
 	/**
-	* @var LoggerInterface Logging object that impliments the PSR-3 LoggerInterface
+	* @var Psr\Log\LoggerInterface Logging object that impliments the PSR-3 LoggerInterface
 	*/
 	public $logger;
 
