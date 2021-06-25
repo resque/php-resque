@@ -40,10 +40,8 @@ jobs:
       - name: Install redis
         run: sudo apt-get install -y redis-server
 
-      - name: Run PHPunit
-        run: phpunit --configuration phpunit.xml.dist --coverage-clover=coverage.xml
+      - name: Setup problem matchers for PHPUnit
+        run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
-      - name: Collect code coverage
-        uses: codecov/codecov-action@v1
-        with:
-          files: ./coverage.xml
+      - name: Run PHPunit
+        run: phpunit --configuration phpunit.xml.dist
