@@ -8,7 +8,7 @@ jobs:
     name: "PHP-${{ matrix.php-versions }}: CS/PHPStan/PHPUnit"
     strategy:
       matrix:
-        php-versions: ['7.2', '7.3', '7.4']
+        php-versions: ['7.3', '7.4']
         experimental: [false]
         include:
           - php-versions: '8.0'
@@ -36,6 +36,9 @@ jobs:
 
       - name: Run PHPStan
         run: phpstan analyse lib -l1
+
+      - name: Install redis
+        run: sudo apt-get install -y redis-server
 
       - name: Run PHPunit
         run: phpunit --configuration phpunit.xml.dist --coverage-clover=coverage.xml
