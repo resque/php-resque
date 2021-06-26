@@ -29,7 +29,7 @@ jobs:
 
       - name: Run PHPCS
         continue-on-error: true
-        run: phpcs -q --report=checkstyle lib --standard=PSR12 | cs2pr
+        run: phpcs -q --report=checkstyle lib | cs2pr
 
       - name: Install dependencies
         run: composer install
