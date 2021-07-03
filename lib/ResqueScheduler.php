@@ -87,7 +87,7 @@ class ResqueScheduler
 	 */
 	public static function getDelayedTimestampSize($timestamp)
 	{
-		$timestamp = self::toTimestamp($timestamp);
+		$timestamp = self::getTimestamp($timestamp);
 		return Resque::redis()->llen('delayed:' . $timestamp, $timestamp);
 	}
 
