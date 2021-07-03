@@ -30,6 +30,12 @@ class Resque_Redis
 	const DEFAULT_DATABASE = 0;
 
 	/**
+	 * Connection driver
+	 * @var mixed
+	 */
+	private $driver;
+
+	/**
 	 * @var array List of all commands in Redis that supply a key as their
 	 *	first argument. Used to prefix keys with the Resque namespace.
 	 */
