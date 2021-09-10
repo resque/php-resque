@@ -243,6 +243,11 @@ class Resque_Job
 				$this->queue
 			);
 		}
+		
+		if(!empty($job->payload['id'])) {
+			Resque_Job_PID::del($job->payload['id']);
+		}
+
 		Resque_Stat::incr('failed');
 		Resque_Stat::incr('failed:' . $this->worker);
 	}
