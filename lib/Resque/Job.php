@@ -244,8 +244,8 @@ class Resque_Job
 			);
 		}
 		
-		if(!empty($job->payload['id'])) {
-			Resque_Job_PID::del($job->payload['id']);
+		if(!empty($this->payload['id'])) {
+			Resque_Job_PID::del($this->payload['id']);
 		}
 
 		Resque_Stat::incr('failed');
