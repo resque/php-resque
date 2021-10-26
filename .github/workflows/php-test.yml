@@ -2,10 +2,10 @@ name: PHP Tests
 on: [push, pull_request]
 
 jobs:
-  php:
+  phpunit:
     runs-on: ubuntu-latest
     continue-on-error: ${{ matrix.experimental }}
-    name: "PHP-${{ matrix.php-versions }}: CS/PHPStan/PHPUnit"
+    name: "PHP-${{ matrix.php-versions }}: PHPUnit"
     strategy:
       matrix:
         php-versions: ['7.3', '7.4']
@@ -21,21 +21,14 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-versions }}
-          tools: cs2pr, phpcs, phpstan, phpunit
+          tools: phpunit
           extensions: redis
 
       - name: Setup problem matchers for PHP
         run: echo "::add-matcher::${{ runner.tool_cache }}/php.json"
 
-      - name: Run PHPCS
-        continue-on-error: true
-        run: phpcs -q --report=checkstyle lib | cs2pr
-
       - name: Install dependencies
         run: composer install
-
-      - name: Run PHPStan
-        run: phpstan analyse lib -l1
 
       - name: Install redis
         run: sudo apt-get install -y redis-server
@@ -45,3 +38,47 @@ jobs:
 
       - name: Run PHPunit
         run: phpunit --configuration phpunit.xml.dist
+
+  phpcs:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    name: "PHPCS"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup PHPCS
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+          tools: cs2pr, phpcs
+
+      - name: Setup problem matchers for PHP
+        run: echo "::add-matcher::${{ runner.tool_cache }}/php.json"
+
+      - name: Run PHPCS
+        run: phpcs -q --report=checkstyle lib | cs2pr
+
+  phpstan:
+    runs-on: ubuntu-latest
+    continue-on-error: false
+    name: "PHPStan"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup PHPStan
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+          tools: phpstan
+
+      - name: Setup problem matchers for PHP
+        run: echo "::add-matcher::${{ runner.tool_cache }}/php.json"
+
+      - name: Install dependencies
+        run: composer install
+
+      - name: Run PHPStan
+        run: phpstan analyse lib -l1
+
