@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Interface that all failure backends should implement.
  *

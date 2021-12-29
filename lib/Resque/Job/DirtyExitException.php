@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Runtime exception class for a job that does not exit cleanly.
  *
@@ -8,5 +9,4 @@
  */
 class Resque_Job_DirtyExitException extends RuntimeException
 {
-
 }
