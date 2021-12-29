@@ -49,7 +49,7 @@ class Resque_Failure
 	 */
 	public static function getBackend()
 	{
-		if(self::$backend === null) {
+		if (self::$backend === null) {
 			self::$backend = 'Resque_Failure_Redis';
 		}
 

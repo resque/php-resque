@@ -1,5 +1,6 @@
 <?php
-declare(ticks = 1);
+
+declare(ticks=1);
 
 /**
  * ResqueScheduler worker to handle scheduling of delayed tasks.
@@ -14,12 +15,12 @@ class ResqueScheduler_Worker
 	const LOG_NONE = 0;
 	const LOG_NORMAL = 1;
 	const LOG_VERBOSE = 2;
-	
+
 	/**
 	 * @var int Current log level of this worker.
 	 */
 	public $logLevel = 0;
-	
+
 	/**
 	 * @var int Interval to sleep for between checking schedules.
 	 */
@@ -53,16 +54,16 @@ class ResqueScheduler_Worker
 		$this->registerSigHandlers();
 
 		while (true) {
-			if($this->shutdown) {
+			if ($this->shutdown) {
 				break;
 			}
-			if(!$this->paused) {
+			if (!$this->paused) {
 				$this->handleDelayedItems();
 			}
 			$this->sleep();
 		}
 	}
-	
+
 	/**
 	 * Handle delayed items for the next scheduled timestamp.
 	 *
@@ -78,7 +79,7 @@ class ResqueScheduler_Worker
 			$this->enqueueDelayedItemsForTimestamp($oldestJobTimestamp);
 		}
 	}
-	
+
 	/**
 	 * Schedule all of the delayed jobs for a given timestamp.
 	 *
@@ -91,8 +92,8 @@ class ResqueScheduler_Worker
 	{
 		$item = null;
 		while ($item = ResqueScheduler::nextItemForTimestamp($timestamp)) {
-			$this->log('queueing ' . $item['class'] . ' in ' . $item['queue'] .' [delayed]');
-			
+			$this->log('queueing ' . $item['class'] . ' in ' . $item['queue'] . ' [delayed]');
+
 			Resque_Event::trigger('beforeDelayedEnqueue', array(
 				'queue' => $item['queue'],
 				'class' => $item['class'],
@@ -103,7 +104,7 @@ class ResqueScheduler_Worker
 			call_user_func_array('Resque::enqueue', $payload);
 		}
 	}
-	
+
 	/**
 	 * Sleep for the defined interval.
 	 */
@@ -111,7 +112,7 @@ class ResqueScheduler_Worker
 	{
 		sleep($this->interval);
 	}
-	
+
 	/**
 	 * Update the status of the current worker process.
 	 *
@@ -123,11 +124,11 @@ class ResqueScheduler_Worker
 	 */
 	private function updateProcLine($status)
 	{
-		if(function_exists('setproctitle')) {
+		if (function_exists('setproctitle')) {
 			setproctitle('resque-scheduler-' . ResqueScheduler::VERSION . ': ' . $status);
 		}
 	}
-	
+
 	/**
 	 * Output a given log message to STDOUT.
 	 *
@@ -135,10 +136,9 @@ class ResqueScheduler_Worker
 	 */
 	public function log($message)
 	{
-		if($this->logLevel == self::LOG_NORMAL) {
+		if ($this->logLevel == self::LOG_NORMAL) {
 			fwrite(STDOUT, "*** " . $message . "\n");
-		}
-		else if($this->logLevel == self::LOG_VERBOSE) {
+		} elseif ($this->logLevel == self::LOG_VERBOSE) {
 			fwrite(STDOUT, "** [" . strftime('%T %Y-%m-%d') . "] " . $message . "\n");
 		}
 	}
@@ -152,7 +152,7 @@ class ResqueScheduler_Worker
 	 */
 	private function registerSigHandlers()
 	{
-		if(!function_exists('pcntl_signal')) {
+		if (!function_exists('pcntl_signal')) {
 			return;
 		}
 

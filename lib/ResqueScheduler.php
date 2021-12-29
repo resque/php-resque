@@ -1,4 +1,5 @@
 <?php
+
 /**
 * ResqueScheduler core class to handle scheduling of jobs in the future.
 *
@@ -10,7 +11,7 @@
 class ResqueScheduler
 {
 	const VERSION = "0.1";
-	
+
 	/**
 	 * Enqueue a job in a given number of seconds from now.
 	 *
@@ -45,7 +46,7 @@ class ResqueScheduler
 
 		$job = self::jobToHash($queue, $class, $args);
 		self::delayedPush($at, $job);
-		
+
 		Resque_Event::trigger('afterSchedule', array(
 			'at'    => $at,
 			'queue' => $queue,
@@ -91,60 +92,59 @@ class ResqueScheduler
 		return Resque::redis()->llen('delayed:' . $timestamp, $timestamp);
 	}
 
-    /**
-     * Remove a delayed job from the queue
-     *
-     * note: you must specify exactly the same
-     * queue, class and arguments that you used when you added
-     * to the delayed queue
-     *
-     * also, this is an expensive operation because all delayed keys have tobe
-     * searched
-     *
-     * @param $queue
-     * @param $class
-     * @param $args
-     * @return int number of jobs that were removed
-     */
-    public static function removeDelayed($queue, $class, $args)
-    {
-       $destroyed=0;
-       $item=json_encode(self::jobToHash($queue, $class, $args));
-       $redis=Resque::redis();
+	/**
+	 * Remove a delayed job from the queue
+	 *
+	 * note: you must specify exactly the same
+	 * queue, class and arguments that you used when you added
+	 * to the delayed queue
+	 *
+	 * also, this is an expensive operation because all delayed keys have tobe
+	 * searched
+	 *
+	 * @param $queue
+	 * @param $class
+	 * @param $args
+	 * @return int number of jobs that were removed
+	 */
+	public static function removeDelayed($queue, $class, $args)
+	{
+		$destroyed = 0;
+		$item = json_encode(self::jobToHash($queue, $class, $args));
+		$redis = Resque::redis();
 
-       foreach($redis->keys('delayed:*') as $key)
-       {
-           $key=$redis->removePrefix($key);
-           $destroyed+=$redis->lrem($key,0,$item);
-       }
+		foreach ($redis->keys('delayed:*') as $key) {
+			$key = $redis->removePrefix($key);
+			$destroyed += $redis->lrem($key, 0, $item);
+		}
 
-       return $destroyed;
-    }
+		return $destroyed;
+	}
 
-    /**
-     * removed a delayed job queued for a specific timestamp
-     *
-     * note: you must specify exactly the same
-     * queue, class and arguments that you used when you added
-     * to the delayed queue
-     *
-     * @param $timestamp
-     * @param $queue
-     * @param $class
-     * @param $args
-     * @return mixed
-     */
-    public static function removeDelayedJobFromTimestamp($timestamp, $queue, $class, $args)
-    {
-        $key = 'delayed:' . self::getTimestamp($timestamp);
-        $item = json_encode(self::jobToHash($queue, $class, $args));
-        $redis = Resque::redis();
-        $count = $redis->lrem($key, 0, $item);
-        self::cleanupTimestamp($key, $timestamp);
+	/**
+	 * removed a delayed job queued for a specific timestamp
+	 *
+	 * note: you must specify exactly the same
+	 * queue, class and arguments that you used when you added
+	 * to the delayed queue
+	 *
+	 * @param $timestamp
+	 * @param $queue
+	 * @param $class
+	 * @param $args
+	 * @return mixed
+	 */
+	public static function removeDelayedJobFromTimestamp($timestamp, $queue, $class, $args)
+	{
+		$key = 'delayed:' . self::getTimestamp($timestamp);
+		$item = json_encode(self::jobToHash($queue, $class, $args));
+		$redis = Resque::redis();
+		$count = $redis->lrem($key, 0, $item);
+		self::cleanupTimestamp($key, $timestamp);
 
-        return $count;
-    }
-	
+		return $count;
+	}
+
 	/**
 	 * Generate hash of all job properties to be saved in the scheduled queue.
 	 *
@@ -194,7 +194,7 @@ class ResqueScheduler
 		if ($timestamp instanceof DateTime) {
 			$timestamp = $timestamp->getTimestamp();
 		}
-		
+
 		if ((int)$timestamp != $timestamp) {
 			throw new ResqueScheduler_InvalidTimestampException(
 				'The supplied timestamp value could not be converted to an integer.'
@@ -220,19 +220,18 @@ class ResqueScheduler
 	{
 		if ($at === null) {
 			$at = time();
-		}
-		else {
+		} else {
 			$at = self::getTimestamp($at);
 		}
-	
+
 		$items = Resque::redis()->zrangebyscore('delayed_queue_schedule', '-inf', $at, array('limit' => array(0, 1)));
 		if (!empty($items)) {
 			return $items[0];
 		}
-		
+
 		return false;
-	}	
-	
+	}
+
 	/**
 	 * Pop a job off the delayed queue for a given timestamp.
 	 *
@@ -243,9 +242,9 @@ class ResqueScheduler
 	{
 		$timestamp = self::getTimestamp($timestamp);
 		$key = 'delayed:' . $timestamp;
-		
+
 		$item = json_decode(Resque::redis()->lpop($key), true);
-		
+
 		self::cleanupTimestamp($key, $timestamp);
 		return $item;
 	}
@@ -261,11 +260,10 @@ class ResqueScheduler
 	{
 		if (empty($class)) {
 			throw new Resque_Exception('Jobs must be given a class.');
-		}
-		else if (empty($queue)) {
+		} elseif (empty($queue)) {
 			throw new Resque_Exception('Jobs must be put in a queue.');
 		}
-		
+
 		return true;
 	}
 }

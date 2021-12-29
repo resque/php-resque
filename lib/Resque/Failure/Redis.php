@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Redis backend for storing failed Resque jobs.
  *
@@ -19,7 +20,7 @@ class Resque_Failure_Redis implements Resque_Failure_Interface
 	 */
 	public function __construct($payload, $exception, $worker, $queue)
 	{
-		$data = new stdClass;
+		$data = new stdClass();
 		$data->failed_at = date('c');
 		$data->payload = $payload;
 		$data->exception = get_class($exception);

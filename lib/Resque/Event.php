@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Resque event/plugin system class
  *
@@ -29,17 +30,17 @@ class Resque_Event
 		if (empty(self::$events[$event])) {
 			return true;
 		}
-		
+
 		foreach (self::$events[$event] as $callback) {
 			if (!is_callable($callback)) {
 				continue;
 			}
 			call_user_func_array($callback, $data);
 		}
-		
+
 		return true;
 	}
-	
+
 	/**
 	 * Listen in on a given event to have a specified callback fired.
 	 *
@@ -52,11 +53,11 @@ class Resque_Event
 		if (!isset(self::$events[$event])) {
 			self::$events[$event] = array();
 		}
-		
+
 		self::$events[$event][] = $callback;
 		return true;
 	}
-	
+
 	/**
 	 * Stop a given callback from listening on a specific event.
 	 *
@@ -69,15 +70,15 @@ class Resque_Event
 		if (!isset(self::$events[$event])) {
 			return true;
 		}
-		
+
 		$key = array_search($callback, self::$events[$event]);
 		if ($key !== false) {
 			unset(self::$events[$event][$key]);
 		}
-		
+
 		return true;
 	}
-	
+
 	/**
 	 * Call all registered listeners.
 	 */
