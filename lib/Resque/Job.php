@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Resque job.
  *
@@ -64,7 +65,7 @@ class Resque_Job
 			$id = Resque::generateJobId();
 		}
 
-		if($args !== null && !is_array($args)) {
+		if ($args !== null && !is_array($args)) {
 			throw new InvalidArgumentException(
 				'Supplied $args must be an array.'
 			);
@@ -77,7 +78,7 @@ class Resque_Job
 			'queue_time' => microtime(true),
 		));
 
-		if($monitor) {
+		if ($monitor) {
 			Resque_Job_Status::create($id, $prefix);
 		}
 
@@ -94,7 +95,7 @@ class Resque_Job
 	public static function reserve($queue)
 	{
 		$payload = Resque::pop($queue);
-		if(!is_array($payload)) {
+		if (!is_array($payload)) {
 			return false;
 		}
 
@@ -113,7 +114,7 @@ class Resque_Job
 	{
 		$item = Resque::blpop($queues, $timeout);
 
-		if(!is_array($item)) {
+		if (!is_array($item)) {
 			return false;
 		}
 
@@ -127,7 +128,7 @@ class Resque_Job
 	 */
 	public function updateStatus($status, $result = null)
 	{
-		if(empty($this->payload['id'])) {
+		if (empty($this->payload['id'])) {
 			return;
 		}
 
@@ -142,7 +143,7 @@ class Resque_Job
 	 */
 	public function getStatus()
 	{
-		if(empty($this->payload['id'])) {
+		if (empty($this->payload['id'])) {
 			return null;
 		}
 
@@ -194,20 +195,20 @@ class Resque_Job
 			Resque_Event::trigger('beforePerform', $this);
 
 			$instance = $this->getInstance();
-			if(is_callable([$instance, 'setUp'])) {
+			if (is_callable([$instance, 'setUp'])) {
 				$instance->setUp();
 			}
 
 			$result = $instance->perform();
 
-			if(is_callable([$instance, 'tearDown'])) {
+			if (is_callable([$instance, 'tearDown'])) {
 				$instance->tearDown();
 			}
 
 			Resque_Event::trigger('afterPerform', $this);
 		}
 		// beforePerform/setUp have said don't perform this job. Return.
-		catch(Resque_Job_DontPerform $e) {
+		catch (Resque_Job_DontPerform $e) {
 			$result = false;
 		}
 
@@ -255,7 +256,7 @@ class Resque_Job
 		$monitor = false;
 		if (!empty($this->payload['id'])) {
 			$status = new Resque_Job_Status($this->payload['id'], $this->getPrefix());
-			if($status->isTracking()) {
+			if ($status->isTracking()) {
 				$monitor = true;
 			}
 		}
@@ -271,13 +272,13 @@ class Resque_Job
 	public function __toString()
 	{
 		$name = array(
-			'Job{' . $this->queue .'}'
+			'Job{' . $this->queue . '}'
 		);
-		if(!empty($this->payload['id'])) {
+		if (!empty($this->payload['id'])) {
 			$name[] = 'ID: ' . $this->payload['id'];
 		}
 		$name[] = $this->payload['class'];
-		if(!empty($this->payload['args'])) {
+		if (!empty($this->payload['args'])) {
 			$name[] = json_encode($this->payload['args']);
 		}
 		return '(' . implode(' | ', $name) . ')';

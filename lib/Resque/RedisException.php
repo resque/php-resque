@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Redis related exceptions
  *
@@ -9,4 +10,3 @@
 class Resque_RedisException extends Resque_Exception
 {
 }
-?>

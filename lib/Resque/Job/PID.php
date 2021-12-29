@@ -1,4 +1,5 @@
 <?php
+
 /**
  * PID tracker for the forked worker job.
  *
@@ -40,4 +41,3 @@ class Resque_Job_PID
 		Resque::redis()->del('job:' . $id . ':pid');
 	}
 }
-
