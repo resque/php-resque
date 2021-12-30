@@ -45,14 +45,18 @@
 		"bin/resque-scheduler"
 	],
 	"autoload": {
-		"psr-0": {
-			"Resque": "lib",
-			"ResqueScheduler": "lib"
+		"psr-4": {
+			"Resque\\": "lib"
 		}
-  },
-  "extra": {
-    "branch-alias": {
-      "dev-master": "1.0-dev"
-    }
-  }
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"Resque\\Tests\\": "test/Resque/Tests"
+		}
+	},
+	"extra": {
+		"branch-alias": {
+			"dev-master": "1.0-dev"
+		}
+	}
 }

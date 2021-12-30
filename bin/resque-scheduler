@@ -28,10 +28,10 @@ if (!class_exists('Composer\Autoload\ClassLoader', false)) {
 $REDIS_BACKEND = getenv('REDIS_BACKEND');
 $REDIS_BACKEND_DB = getenv('REDIS_BACKEND_DB');
 if(!empty($REDIS_BACKEND)) {
-	if (empty($REDIS_BACKEND_DB)) 
-		Resque::setBackend($REDIS_BACKEND);
+	if (empty($REDIS_BACKEND_DB))
+		\Resque\Resque::setBackend($REDIS_BACKEND);
 	else
-		Resque::setBackend($REDIS_BACKEND, $REDIS_BACKEND_DB);
+		\Resque\Resque::setBackend($REDIS_BACKEND, $REDIS_BACKEND_DB);
 }
 
 // Set log level for resque-scheduler
@@ -40,10 +40,10 @@ $LOGGING = getenv('LOGGING');
 $VERBOSE = getenv('VERBOSE');
 $VVERBOSE = getenv('VVERBOSE');
 if(!empty($LOGGING) || !empty($VERBOSE)) {
-	$logLevel = ResqueScheduler_Worker::LOG_NORMAL;
+	$logLevel = \Resque\Worker\SchedulerWorker::LOG_NORMAL;
 }
 else if(!empty($VVERBOSE)) {
-	$logLevel = ResqueScheduler_Worker::LOG_VERBOSE;
+	$logLevel = \Resque\Worker\SchedulerWorker::LOG_VERBOSE;
 }
 
 // Check for jobs every $interval seconds
@@ -66,10 +66,10 @@ if($APP_INCLUDE) {
 $PREFIX = getenv('PREFIX');
 if(!empty($PREFIX)) {
     fwrite(STDOUT, '*** Prefix set to '.$PREFIX."\n");
-    Resque_Redis::prefix($PREFIX);
+    \Resque\Redis::prefix($PREFIX);
 }
 
-$worker = new ResqueScheduler_Worker();
+$worker = new \Resque\Worker\SchedulerWorker();
 $worker->logLevel = $logLevel;
 
 $PIDFILE = getenv('PIDFILE');

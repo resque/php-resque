@@ -1,5 +1,9 @@
 <?php
 
+namespace Resque\Exceptions;
+
+use \Exception as CoreException;
+
 /**
  * Exception to be thrown if while enqueuing a job it should not be created.
  *
@@ -7,6 +11,6 @@
  * @author		Chris Boulton <chris@bigcommerce.com>
  * @license		http://www.opensource.org/licenses/mit-license.php
  */
-class Resque_Job_DontCreate extends Exception
+class DoNotCreateException extends CoreException
 {
 }

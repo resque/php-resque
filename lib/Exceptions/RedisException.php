@@ -1,12 +1,14 @@
 <?php
 
+namespace Resque\Exceptions;
+
 /**
- * Resque exception.
+ * Redis related exceptions
  *
  * @package		Resque
  * @author		Chris Boulton <chris@bigcommerce.com>
  * @license		http://www.opensource.org/licenses/mit-license.php
  */
-class Resque_Exception extends Exception
+class RedisException extends Exception
 {
 }

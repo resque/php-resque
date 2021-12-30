@@ -35,7 +35,7 @@ if(!preg_match('#^\s*port\s+([0-9]+)#m', $config, $matches)) {
 	exit(1);
 }
 
-Resque::setBackend('localhost:' . $matches[1]);
+\Resque\Resque::setBackend('localhost:' . $matches[1]);
 
 // Shutdown
 function killRedis($pid)
@@ -96,7 +96,7 @@ class Test_Job
 	}
 }
 
-class Failing_Job_Exception extends Exception
+class Failing_Job_Exception extends \Exception
 {
 
 }

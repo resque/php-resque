@@ -1,13 +1,27 @@
 <?php
 
+namespace Resque\Tests;
+
+use \Resque\Worker\ResqueWorker;
+use \Resque\Resque;
+use \Resque\Redis;
+use \Resque\JobHandler;
+use \Resque\Stat;
+use \Resque\Job\JobInterface;
+use \Resque\Job\FactoryInterface;
+use \Test_Job_With_SetUp;
+use \Test_Job_With_TearDown;
+use \CredisException;
+use \stdClass;
+
 /**
- * Resque_Job tests.
+ * JobHandler tests.
  *
  * @package		Resque/Tests
  * @author		Chris Boulton <chris@bigcommerce.com>
  * @license		http://www.opensource.org/licenses/mit-license.php
  */
-class Resque_Tests_JobTest extends Resque_Tests_TestCase
+class JobHandlerTest extends ResqueTestCase
 {
 	protected $worker;
 
@@ -16,7 +30,7 @@ class Resque_Tests_JobTest extends Resque_Tests_TestCase
 		parent::setUp();
 
 		// Register a worker to test with
-		$this->worker = new Resque_Worker('jobs');
+		$this->worker = new ResqueWorker('jobs');
 		$this->worker->setLogger($this->logger);
 		$this->worker->registerWorker();
 	}
@@ -27,7 +41,7 @@ class Resque_Tests_JobTest extends Resque_Tests_TestCase
 	}
 
 	/**
-	 * @expectedException Resque_RedisException
+	 * @expectedException \Resque\Exceptions\RedisException
 	 */
 	public function testRedisErrorThrowsExceptionOnJobCreation()
 	{
@@ -38,7 +52,7 @@ class Resque_Tests_JobTest extends Resque_Tests_TestCase
 			->will($this->throwException(new CredisException('failure')));
 
 		Resque::setBackend(function($database) use ($mockCredis) {
-			return new Resque_Redis('localhost:6379', $database, $mockCredis);
+			return new Redis('localhost:6379', $database, $mockCredis);
 		});
 		Resque::enqueue('jobs', 'This is a test');
 	}
@@ -47,7 +61,7 @@ class Resque_Tests_JobTest extends Resque_Tests_TestCase
 	{
 		Resque::enqueue('jobs', 'Test_Job');
 
-		$job = Resque_Job::reserve('jobs');
+		$job = JobHandler::reserve('jobs');
 		if($job == false) {
 			$this->fail('Job could not be reserved.');
 		}
@@ -60,7 +74,7 @@ class Resque_Tests_JobTest extends Resque_Tests_TestCase
 	 */
 	public function testObjectArgumentsCannotBePassedToJob()
 	{
-		$args = new stdClass;
+		$args = new stdClass();
 		$args->test = 'somevalue';
 		Resque::enqueue('jobs', 'Test_Job', $args);
 	}
@@ -79,7 +93,7 @@ class Resque_Tests_JobTest extends Resque_Tests_TestCase
 			),
 		);
 		Resque::enqueue('jobs', 'Test_Job', $args);
-		$job = Resque_Job::reserve('jobs');
+		$job = JobHandler::reserve('jobs');
 
 		$this->assertEquals($args, $job->getArguments());
 	}
@@ -87,8 +101,8 @@ class Resque_Tests_JobTest extends Resque_Tests_TestCase
 	public function testAfterJobIsReservedItIsRemoved()
 	{
 		Resque::enqueue('jobs', 'Test_Job');
-		Resque_Job::reserve('jobs');
-		$this->assertFalse(Resque_Job::reserve('jobs'));
+		JobHandler::reserve('jobs');
+		$this->assertFalse(JobHandler::reserve('jobs'));
 	}
 
 	public function testRecreatedJobMatchesExistingJob()
@@ -106,12 +120,12 @@ class Resque_Tests_JobTest extends Resque_Tests_TestCase
 		);
 
 		Resque::enqueue('jobs', 'Test_Job', $args);
-		$job = Resque_Job::reserve('jobs');
+		$job = JobHandler::reserve('jobs');
 
 		// Now recreate it
 		$job->recreate();
 
-		$newJob = Resque_Job::reserve('jobs');
+		$newJob = JobHandler::reserve('jobs');
 		$this->assertEquals($job->payload['class'], $newJob->payload['class']);
 		$this->assertEquals($job->getArguments(), $newJob->getArguments());
 	}
@@ -123,17 +137,17 @@ class Resque_Tests_JobTest extends Resque_Tests_TestCase
 			'class' => 'Failing_Job',
 			'args' => null
 		);
-		$job = new Resque_Job('jobs', $payload);
+		$job = new JobHandler('jobs', $payload);
 		$job->worker = $this->worker;
 
 		$this->worker->perform($job);
 
-		$this->assertEquals(1, Resque_Stat::get('failed'));
-		$this->assertEquals(1, Resque_Stat::get('failed:'.$this->worker));
+		$this->assertEquals(1, Stat::get('failed'));
+		$this->assertEquals(1, Stat::get('failed:'.$this->worker));
 	}
 
 	/**
-	 * @expectedException Resque_Exception
+	 * @expectedException \Resque\Exceptions\Exception
 	 */
 	public function testJobWithoutPerformMethodThrowsException()
 	{
@@ -144,7 +158,7 @@ class Resque_Tests_JobTest extends Resque_Tests_TestCase
 	}
 
 	/**
-	 * @expectedException Resque_Exception
+	 * @expectedException Resque\Exceptions\Exception
 	 */
 	public function testInvalidJobThrowsException()
 	{
@@ -163,7 +177,7 @@ class Resque_Tests_JobTest extends Resque_Tests_TestCase
 				'somevar2',
 			),
 		);
-		$job = new Resque_Job('jobs', $payload);
+		$job = new JobHandler('jobs', $payload);
 		$job->perform();
 
 		$this->assertTrue(Test_Job_With_SetUp::$called);
@@ -178,7 +192,7 @@ class Resque_Tests_JobTest extends Resque_Tests_TestCase
 				'somevar2',
 			),
 		);
-		$job = new Resque_Job('jobs', $payload);
+		$job = new JobHandler('jobs', $payload);
 		$job->perform();
 
 		$this->assertTrue(Test_Job_With_TearDown::$called);
@@ -193,14 +207,14 @@ class Resque_Tests_JobTest extends Resque_Tests_TestCase
 		);
 
 		foreach($fixture as $item) {
-			Resque_Redis::prefix($item['test']);
-			$this->assertEquals(Resque_Redis::getPrefix(), $item['assertValue']);
+			Redis::prefix($item['test']);
+			$this->assertEquals(Redis::getPrefix(), $item['assertValue']);
 		}
 	}
 
 	public function testJobWithNamespace()
 	{
-		Resque_Redis::prefix('php');
+		Redis::prefix('php');
 		$queue = 'jobs';
 		$payload = array('another_value');
 		Resque::enqueue($queue, 'Test_Job_With_TearDown', $payload);
@@ -208,7 +222,7 @@ class Resque_Tests_JobTest extends Resque_Tests_TestCase
 		$this->assertEquals(Resque::queues(), array('jobs'));
 		$this->assertEquals(Resque::size($queue), 1);
 
-		Resque_Redis::prefix('resque');
+		Redis::prefix('resque');
 		$this->assertEquals(Resque::size($queue), 0);
 	}
 
@@ -382,69 +396,69 @@ class Resque_Tests_JobTest extends Resque_Tests_TestCase
 	public function testUseDefaultFactoryToGetJobInstance()
 	{
 		$payload = array(
-			'class' => 'Some_Job_Class',
+			'class' => 'Resque\Tests\Some_Job_Class',
 			'args' => null
 		);
-		$job = new Resque_Job('jobs', $payload);
+		$job = new JobHandler('jobs', $payload);
 		$instance = $job->getInstance();
-		$this->assertInstanceOf('Some_Job_Class', $instance);
+		$this->assertInstanceOf('Resque\Tests\Some_Job_Class', $instance);
 	}
 
 	public function testUseFactoryToGetJobInstance()
 	{
 		$payload = array(
-			'class' => 'Some_Job_Class',
+			'class' => 'Resque\Tests\Some_Job_Class',
 			'args' => array(array())
 		);
-		$job = new Resque_Job('jobs', $payload);
+		$job = new JobHandler('jobs', $payload);
 		$factory = new Some_Stub_Factory();
 		$job->setJobFactory($factory);
 		$instance = $job->getInstance();
-		$this->assertInstanceOf('Resque_JobInterface', $instance);
+		$this->assertInstanceOf('Resque\Job\JobInterface', $instance);
 	}
 
 	public function testDoNotUseFactoryToGetInstance()
 	{
 		$payload = array(
-			'class' => 'Some_Job_Class',
+			'class' => 'Resque\Tests\Some_Job_Class',
 			'args' => array(array())
 		);
-		$job = new Resque_Job('jobs', $payload);
-		$factory = $this->getMockBuilder('Resque_Job_FactoryInterface')
+		$job = new JobHandler('jobs', $payload);
+		$factory = $this->getMockBuilder('Resque\Job\FactoryInterface')
 			->getMock();
-		$testJob = $this->getMockBuilder('Resque_JobInterface')
+		$testJob = $this->getMockBuilder('Resque\Job\JobInterface')
 			->getMock();
 		$factory->expects(self::never())->method('create')->will(self::returnValue($testJob));
 		$instance = $job->getInstance();
-		$this->assertInstanceOf('Resque_JobInterface', $instance);
+		$this->assertInstanceOf('Resque\Job\JobInterface', $instance);
 	}
 
 	public function testJobStatusIsNullIfIdMissingFromPayload()
 	{
 		$payload = array(
-			'class' => 'Some_Job_Class',
+			'class' => 'Resque\Tests\Some_Job_Class',
 			'args' => null
 		);
-		$job = new Resque_Job('jobs', $payload);
+		$job = new JobHandler('jobs', $payload);
 		$this->assertEquals(null, $job->getStatus());
 	}
 
 	public function testJobCanBeRecreatedFromLegacyPayload()
 	{
 		$payload = array(
-			'class' => 'Some_Job_Class',
+			'class' => 'Resque\Tests\Some_Job_Class',
 			'args' => null
 		);
-		$job = new Resque_Job('jobs', $payload);
+		$job = new JobHandler('jobs', $payload);
 		$job->recreate();
-		$newJob = Resque_Job::reserve('jobs');
+		$newJob = JobHandler::reserve('jobs');
 		$this->assertEquals('jobs', $newJob->queue);
-		$this->assertEquals('Some_Job_Class', $newJob->payload['class']);
+		$this->assertEquals('Resque\Tests\Some_Job_Class', $newJob->payload['class']);
 		$this->assertNotNull($newJob->payload['id']);
 	}
 }
 
-class Some_Job_Class implements Resque_JobInterface
+class Some_Job_Class implements JobInterface
 {
 
 	/**
@@ -456,14 +470,14 @@ class Some_Job_Class implements Resque_JobInterface
 	}
 }
 
-class Some_Stub_Factory implements Resque_Job_FactoryInterface
+class Some_Stub_Factory implements FactoryInterface
 {
 
 	/**
 	 * @param $className
 	 * @param array $args
 	 * @param $queue
-	 * @return Resque_JobInterface
+	 * @return Resque\Job\JobInterface
 	 */
 	public function create($className, $args, $queue)
 	{

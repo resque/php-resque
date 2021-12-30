@@ -1,5 +1,13 @@
 <?php
 
+namespace Resque;
+
+use \Credis_Client;
+use \Credis_Cluster;
+use \CredisException;
+use \Resque\Exceptions\RedisException;
+use \InvalidArgumentException;
+
 /**
  * Wrap Credis to add namespace support and various helper methods.
  *
@@ -7,7 +15,7 @@
  * @author		Chris Boulton <chris@bigcommerce.com>
  * @license		http://www.opensource.org/licenses/mit-license.php
  */
-class Resque_Redis
+class Redis
 {
 	/**
 	 * Redis namespace
@@ -152,7 +160,7 @@ class Resque_Redis
 				$this->driver->select($database);
 			}
 		} catch (CredisException $e) {
-			throw new Resque_RedisException('Error communicating with Redis: ' . $e->getMessage(), 0, $e);
+			throw new RedisException('Error communicating with Redis: ' . $e->getMessage(), 0, $e);
 		}
 	}
 
@@ -191,7 +199,7 @@ class Resque_Redis
 		// Check the URI scheme
 		$validSchemes = array('redis', 'tcp');
 		if (isset($parts['scheme']) && ! in_array($parts['scheme'], $validSchemes)) {
-			throw new \InvalidArgumentException("Invalid DSN. Supported schemes are " . implode(', ', $validSchemes));
+			throw new InvalidArgumentException("Invalid DSN. Supported schemes are " . implode(', ', $validSchemes));
 		}
 
 		// Allow simple 'hostname' format, which `parse_url` treats as a path, not host.
@@ -264,7 +272,7 @@ class Resque_Redis
 		try {
 			return $this->driver->__call($name, $args);
 		} catch (CredisException $e) {
-			throw new Resque_RedisException('Error communicating with Redis: ' . $e->getMessage(), 0, $e);
+			throw new RedisException('Error communicating with Redis: ' . $e->getMessage(), 0, $e);
 		}
 	}
 

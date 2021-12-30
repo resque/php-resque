@@ -1,5 +1,10 @@
 <?php
 
+namespace Resque;
+
+use \RuntimeException;
+use \Resque\Exceptions\DoNotCreateException;
+
 /**
  * Base Resque class.
  *
@@ -14,7 +19,7 @@ class Resque
 	const DEFAULT_INTERVAL = 5;
 
 	/**
-	 * @var Resque_Redis Instance of Resque_Redis that talks to redis.
+	 * @var Redis Instance of Resque\Redis that talks to redis.
 	 */
 	public static $redis = null;
 
@@ -40,7 +45,7 @@ class Resque
 	 *
 	 * @param mixed $server Host/port combination separated by a colon, DSN-formatted URI, or
 	 *                      a callable that receives the configured database ID
-	 *                      and returns a Resque_Redis instance, or
+	 *                      and returns a Resque\Redis instance, or
 	 *                      a nested array of servers with host/port pairs.
 	 * @param int $database
 	 * @param string $auth
@@ -54,9 +59,9 @@ class Resque
 	}
 
 	/**
-	 * Return an instance of the Resque_Redis class instantiated for Resque.
+	 * Return an instance of the Resque\Redis class instantiated for Resque.
 	 *
-	 * @return Resque_Redis Instance of Resque_Redis.
+	 * @return \Resque\Redis Instance of Resque\Redis.
 	 */
 	public static function redis()
 	{
@@ -67,7 +72,7 @@ class Resque
 		if (is_callable(self::$redisServer)) {
 			self::$redis = call_user_func(self::$redisServer, self::$redisDatabase);
 		} else {
-			self::$redis = new Resque_Redis(self::$redisServer, self::$redisDatabase);
+			self::$redis = new Redis(self::$redisServer, self::$redisDatabase);
 		}
 
 		if (!empty(self::$auth)) {
@@ -194,7 +199,7 @@ class Resque
 		}
 
 		/**
-		 * Normally the Resque_Redis class returns queue names without the prefix
+		 * Normally the Resque\Redis class returns queue names without the prefix
 		 * But the blpop is a bit different. It returns the name as prefix:queue:name
 		 * So we need to strip off the prefix:queue: part
 		 */
@@ -239,13 +244,13 @@ class Resque
 			'id'    => $id,
 		);
 		try {
-			Resque_Event::trigger('beforeEnqueue', $hookParams);
-		} catch (Resque_Job_DontCreate $e) {
+			Event::trigger('beforeEnqueue', $hookParams);
+		} catch (DoNotCreateException $e) {
 			return false;
 		}
 
-		Resque_Job::create($queue, $class, $args, $trackStatus, $id, $prefix);
-		Resque_Event::trigger('afterEnqueue', $hookParams);
+		JobHandler::create($queue, $class, $args, $trackStatus, $id, $prefix);
+		Event::trigger('afterEnqueue', $hookParams);
 
 		return $id;
 	}
@@ -254,11 +259,11 @@ class Resque
 	 * Reserve and return the next available job in the specified queue.
 	 *
 	 * @param string $queue Queue to fetch next available job from.
-	 * @return Resque_Job Instance of Resque_Job to be processed, false if none or error.
+	 * @return \Resque\JobHandler Instance of Resque\JobHandler to be processed, false if none or error.
 	 */
 	public static function reserve($queue)
 	{
-		return Resque_Job::reserve($queue);
+		return JobHandler::reserve($queue);
 	}
 
 	/**
