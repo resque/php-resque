@@ -8,17 +8,17 @@
 	convertWarningsToExceptions="true"
 	processIsolation="false"
 	stopOnFailure="false"
-	syntaxCheck="false"
 >
+
 	<testsuites>
 		<testsuite name="Resque Test Suite">
 			<directory>./test/Resque/</directory>
 		</testsuite>
 	</testsuites>
 
-	<filter>
-		<whitelist>
+	<coverage>
+		<include>
 			<directory suffix=".php">./lib/Resque/</directory>
-		</whitelist>
-	</filter>
+		</include>
+	</coverage>
 </phpunit>
