@@ -19,11 +19,14 @@ class Resque_Tests_JobPIDTest extends Resque_Tests_TestCase
 
 		// Register a worker to test with
 		$this->worker = new Resque_Worker('jobs');
-		$this->worker->setLogger(new Resque_Log());
+		$this->worker->setLogger($this->logger);
 	}
 
 	public function testQueuedJobDoesNotReturnPID()
 	{
+		$this->logger->expects($this->never())
+					 ->method('log');
+
 		$token = Resque::enqueue('jobs', 'Test_Job', null, true);
 		$this->assertEquals(0, Resque_Job_PID::get($token));
 	}
