@@ -14,9 +14,12 @@ class Resque_Tests_EventTest extends Resque_Tests_TestCase
 	{
 		Test_Job::$called = false;
 
+		$this->logger = $this->getMockBuilder('Psr\Log\LoggerInterface')
+			->getMock();
+
 		// Register a worker to test with
 		$this->worker = new Resque_Worker('jobs');
-		$this->worker->setLogger(new Resque_Log());
+		$this->worker->setLogger($this->logger);
 		$this->worker->registerWorker();
 	}
 
@@ -56,6 +59,15 @@ class Resque_Tests_EventTest extends Resque_Tests_TestCase
 		Resque_Event::listen($event, array($this, $callback));
 
 		$job = $this->getEventTestJob();
+
+		$this->logger->expects($this->exactly(3))
+			->method('log')
+			->withConsecutive(
+				[ 'notice', '{job} has finished', [ 'job' => $job ] ],
+				[ 'debug', 'Registered signals', [] ],
+				[ 'info', 'Checking {queue} for jobs', [ 'queue' => 'jobs' ] ]
+			);
+
 		$this->worker->perform($job);
 		$this->worker->work(0);
 
@@ -72,6 +84,7 @@ class Resque_Tests_EventTest extends Resque_Tests_TestCase
 			'somevar'
 		));
 		$job = $this->getEventTestJob();
+
 		$this->worker->work(0);
 		$this->assertContains($callback, $this->callbacksHit, $event . ' callback (' . $callback .') was not called');
 	}
