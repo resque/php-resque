@@ -301,6 +301,12 @@ Alternately, you can always `include('bin/resque')` from your application and
 skip setting `APP_INCLUDE` altogether.  Just be sure the various environment
 variables are set (`setenv`) before you do.
 
+### Clustering support
+
+Clustering support is automatically enabled when the `REDIS_BACKEND` environment
+variable contains a comma separated list of hostnames
+(`10.0.0.1:6379,10.0.0.2:6379`).
+
 ### Logging
 
 The port supports the same environment variables for logging to STDOUT. Setting

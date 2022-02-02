@@ -40,11 +40,17 @@ $REDIS_BACKEND = getenv('REDIS_BACKEND');
 
 // A redis database number
 $REDIS_BACKEND_DB = getenv('REDIS_BACKEND_DB');
-if(!empty($REDIS_BACKEND)) {
-    if (empty($REDIS_BACKEND_DB))
-        Resque::setBackend($REDIS_BACKEND);
-    else
-        Resque::setBackend($REDIS_BACKEND, $REDIS_BACKEND_DB);
+
+if (!empty($REDIS_BACKEND)) {
+	if (empty($REDIS_BACKEND_DB)) {
+		if (stripos($REDIS_BACKEND, ',') !== false) {
+			Resque::setBackend(explode(",", $REDIS_BACKEND));
+		} else {
+			Resque::setBackend($REDIS_BACKEND);
+		}
+	} else {
+		Resque::setBackend($REDIS_BACKEND, $REDIS_BACKEND_DB);
+	}
 }
 
 $logLevel = false;
