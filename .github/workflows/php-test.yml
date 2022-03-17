@@ -23,7 +23,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-versions }}
-          tools: phpunit:5
+          tools: phpunit:8
           extensions: redis
 
       - name: Setup problem matchers for PHP
