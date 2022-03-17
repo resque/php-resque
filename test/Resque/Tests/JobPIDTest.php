@@ -13,7 +13,7 @@ class Resque_Tests_JobPIDTest extends Resque_Tests_TestCase
 	 */
 	protected $worker;
 
-	public function setUp()
+	public function setUp(): void
 	{
 		parent::setUp();
 
