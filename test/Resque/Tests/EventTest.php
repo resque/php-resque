@@ -95,7 +95,6 @@ class Resque_Tests_EventTest extends Resque_Tests_TestCase
 		$callback = 'beforeEnqueueEventCallback';
 
 		Resque_Event::listen($event, array($this, $callback));
-		sleep(1);
 		Resque::enqueue('jobs', 'Test_Job', array(
 			'somevar'
 		));
