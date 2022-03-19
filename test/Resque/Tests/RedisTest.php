@@ -7,7 +7,7 @@ use \CredisException;
 use \Resque\Resque;
 
 /**
- * Resque_Event tests.
+ * Redis tests.
  *
  * @package		Resque/Tests
  * @author		Chris Boulton <chris@bigcommerce.com>
