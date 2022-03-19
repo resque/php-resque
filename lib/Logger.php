@@ -2,8 +2,8 @@
 
 namespace Resque;
 
-use \Psr\Log\AbstractLogger;
-use \Psr\Log\LogLevel;
+use Psr\Log\AbstractLogger;
+use Psr\Log\LogLevel;
 
 /**
  * Resque default logger PSR-3 compliant

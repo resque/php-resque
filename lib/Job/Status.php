@@ -2,7 +2,7 @@
 
 namespace Resque\Job;
 
-use \Resque\Resque;
+use Resque\Resque;
 
 /**
  * Status tracker/information for a job.

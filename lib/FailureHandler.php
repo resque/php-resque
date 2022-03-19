@@ -2,9 +2,9 @@
 
 namespace Resque;
 
-use \Resque\Worker\ResqueWorker;
-use \Exception;
-use \Error;
+use Resque\Worker\ResqueWorker;
+use Exception;
+use Error;
 
 /**
  * Failed Resque job.

@@ -2,8 +2,8 @@
 
 namespace Resque;
 
-use \RuntimeException;
-use \Resque\Exceptions\DoNotCreateException;
+use RuntimeException;
+use Resque\Exceptions\DoNotCreateException;
 
 /**
  * Base Resque class.

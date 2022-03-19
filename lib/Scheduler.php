@@ -2,9 +2,9 @@
 
 namespace Resque;
 
-use \Resque\Exceptions\ResqueException;
-use \Resque\Exceptions\InvalidTimestampException;
-use \DateTime;
+use Resque\Exceptions\ResqueException;
+use Resque\Exceptions\InvalidTimestampException;
+use DateTime;
 
 /**
 * Resque scheduler core class to handle scheduling of jobs in the future.

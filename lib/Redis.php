@@ -2,11 +2,11 @@
 
 namespace Resque;
 
-use \Credis_Client;
-use \Credis_Cluster;
-use \CredisException;
-use \Resque\Exceptions\RedisException;
-use \InvalidArgumentException;
+use Credis_Client;
+use Credis_Cluster;
+use CredisException;
+use Resque\Exceptions\RedisException;
+use InvalidArgumentException;
 
 /**
  * Wrap Credis to add namespace support and various helper methods.

@@ -2,7 +2,7 @@
 
 namespace Resque\Exceptions;
 
-use \RuntimeException;
+use RuntimeException;
 
 /**
  * Runtime exception class for a job that does not exit cleanly.

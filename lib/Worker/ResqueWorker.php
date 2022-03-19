@@ -4,19 +4,19 @@ declare(ticks=1);
 
 namespace Resque\Worker;
 
-use \Resque\Logger;
-use \Resque\Resque;
-use \CredisException;
-use \Psr\Log\LogLevel;
-use \Resque\Job\PID;
-use \Resque\Event;
-use \Resque\Exceptions\DirtyExitException;
-use \Resque\Job\Status;
-use \Resque\JobHandler;
-use \Resque\Stat;
-use \Psr\Log\LoggerInterface;
-use \Exception;
-use \Error;
+use Resque\Logger;
+use Resque\Resque;
+use CredisException;
+use Psr\Log\LogLevel;
+use Resque\Job\PID;
+use Resque\Event;
+use Resque\Exceptions\DirtyExitException;
+use Resque\Job\Status;
+use Resque\JobHandler;
+use Resque\Stat;
+use Psr\Log\LoggerInterface;
+use Exception;
+use Error;
 
 /**
  * Resque worker that handles checking queues for jobs, fetching them

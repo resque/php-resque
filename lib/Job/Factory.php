@@ -2,7 +2,7 @@
 
 namespace Resque\Job;
 
-use \Resque\Exceptions\ResqueException;
+use Resque\Exceptions\ResqueException;
 
 class Factory implements FactoryInterface
 {

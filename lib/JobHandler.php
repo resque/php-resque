@@ -2,12 +2,12 @@
 
 namespace Resque;
 
-use \InvalidArgumentException;
-use \Resque\Job\Status;
-use \Resque\Exceptions\DoNotPerformException;
-use \Resque\Job\FactoryInterface;
-use \Resque\Job\Factory;
-use \Error;
+use InvalidArgumentException;
+use Resque\Job\Status;
+use Resque\Exceptions\DoNotPerformException;
+use Resque\Job\FactoryInterface;
+use Resque\Job\Factory;
+use Error;
 
 /**
  * Resque job.

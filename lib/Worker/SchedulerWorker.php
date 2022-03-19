@@ -4,8 +4,8 @@ declare(ticks=1);
 
 namespace Resque\Worker;
 
-use \Resque\Scheduler;
-use \Resque\Event;
+use Resque\Scheduler;
+use Resque\Event;
 
 /**
  * ResqueScheduler worker to handle scheduling of delayed tasks.

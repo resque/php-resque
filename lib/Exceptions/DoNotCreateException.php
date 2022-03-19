@@ -2,7 +2,7 @@
 
 namespace Resque\Exceptions;
 
-use \Exception;
+use Exception;
 
 /**
  * Exception to be thrown if while enqueuing a job it should not be created.
