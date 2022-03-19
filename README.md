@@ -97,12 +97,12 @@ Jobs are queued as follows:
 
 ```php
 // Required if redis is located elsewhere
-Resque::setBackend('localhost:6379');
+Resque\Resque::setBackend('localhost:6379');
 
 $args = array(
           'name' => 'Chris'
         );
-Resque::enqueue('default', 'My_Job', $args);
+Resque\Resque::enqueue('default', 'My_Job', $args);
 ```
 
 ### Defining Jobs
@@ -157,16 +157,16 @@ This method can be used to conveniently remove a job from a queue.
 
 ```php
 // Removes job class 'My_Job' of queue 'default'
-Resque::dequeue('default', ['My_Job']);
+Resque\Resque::dequeue('default', ['My_Job']);
 
 // Removes job class 'My_Job' with Job ID '087df5819a790ac666c9608e2234b21e' of queue 'default'
-Resque::dequeue('default', ['My_Job' => '087df5819a790ac666c9608e2234b21e']);
+Resque\Resque::dequeue('default', ['My_Job' => '087df5819a790ac666c9608e2234b21e']);
 
 // Removes job class 'My_Job' with arguments of queue 'default'
-Resque::dequeue('default', ['My_Job' => array('foo' => 1, 'bar' => 2)]);
+Resque\Resque::dequeue('default', ['My_Job' => array('foo' => 1, 'bar' => 2)]);
 
 // Removes multiple jobs
-Resque::dequeue('default', ['My_Job', 'My_Job2']);
+Resque\Resque::dequeue('default', ['My_Job', 'My_Job2']);
 ```
 
 If no jobs are given, this method will dequeue all jobs matching the provided
@@ -174,7 +174,7 @@ queue.
 
 ```php
 // Removes all jobs of queue 'default'
-Resque::dequeue('default');
+Resque\Resque::dequeue('default');
 ```
 
 ### Tracking Job Statuses
@@ -184,27 +184,27 @@ status information will allow you to check if a job is in the queue, is
 currently being run, has finished, or has failed.
 
 To track the status of a job, pass `true` as the fourth argument to
-`Resque::enqueue`. A token used for tracking the job status will be returned:
+`Resque\Resque::enqueue`. A token used for tracking the job status will be returned:
 
 ```php
-$token = Resque::enqueue('default', 'My_Job', $args, true);
+$token = Resque\Resque::enqueue('default', 'My_Job', $args, true);
 echo $token;
 ```
 
 To fetch the status of a job:
 
 ```php
-$status = new Resque_Job_Status($token);
+$status = new Resque\Job\Status($token);
 echo $status->get(); // Outputs the status
 ```
 
-Job statuses are defined as constants in the `Resque_Job_Status` class. Valid
+Job statuses are defined as constants in the `Resque\Job\Status` class. Valid
 statuses include:
 
--   `Resque_Job_Status::STATUS_WAITING` - Job is still queued
--   `Resque_Job_Status::STATUS_RUNNING` - Job is currently running
--   `Resque_Job_Status::STATUS_FAILED` - Job has failed
--   `Resque_Job_Status::STATUS_COMPLETE` - Job is complete
+-   `Resque\Job\Status::STATUS_WAITING` - Job is still queued
+-   `Resque\Job\Status::STATUS_RUNNING` - Job is currently running
+-   `Resque\Job\Status::STATUS_FAILED` - Job has failed
+-   `Resque\Job\Status::STATUS_COMPLETE` - Job is complete
 -   `false` - Failed to fetch the status; is the token valid?
 
 Statuses are available for up to 24 hours after a job has completed or failed,
@@ -213,13 +213,13 @@ calling the `stop()` method on a status class.
 
 ### Obtaining job PID ###
 
-You can obtain the PID of the actual process doing the work through `Resque_Job_PID`. On a forking OS this will be the
+You can obtain the PID of the actual process doing the work through `Resque\Job\PID`. On a forking OS this will be the
 PID of the forked process.
 
 CAUTION: on a non-forking OS, the PID returned will be of the worker itself.
 
 ```php
-echo Resque_Job_PID::get($token);
+echo Resque\Job\PID::get($token);
 ```
 
 Function returns `0` if the `perform` hasn't started yet, or if it has already ended.
@@ -231,12 +231,12 @@ To quote the documentation for the Ruby resque-scheduler:
 > Delayed jobs are one-off jobs that you want to be put into a queue at some
 point in the future. The classic example is sending an email:
 
-    require 'Resque/Resque.php';
-    require 'ResqueScheduler/ResqueScheduler.php';
+    require 'Resque.php';
+    require 'Scheduler.php';
 
     $in = 3600;
     $args = array('id' => $user->id);
-    ResqueScheduler::enqueueIn($in, 'email', 'SendFollowUpEmail', $args);
+    Resque\Scheduler::enqueueIn($in, 'email', 'SendFollowUpEmail', $args);
 
 The above will store the job for 1 hour in the delayed queue, and then pull the
 job off and submit it to the `email` queue in Resque for processing as soon as
@@ -246,14 +246,14 @@ Instead of passing a relative time in seconds, you can also supply a timestamp
 as either a DateTime object or integer containing a UNIX timestamp to the
 `enqueueAt` method:
 
-    require 'Resque/Resque.php';
-    require 'ResqueScheduler/ResqueScheduler.php';
+    require 'Resque.php';
+    require 'Scheduler.php';
 
     $time = 1332067214;
-    ResqueScheduler::enqueueAt($time, 'email', 'SendFollowUpEmail', $args);
+    Resque\Scheduler::enqueueAt($time, 'email', 'SendFollowUpEmail', $args);
 
     $datetime = new DateTime('2012-03-18 13:21:49');
-    ResqueScheduler::enqueueAt($datetime, 'email', 'SendFollowUpEmail', $args);
+    Resque\Scheduler::enqueueAt($datetime, 'email', 'SendFollowUpEmail', $args);
 
 NOTE: resque-scheduler does not guarantee a job will fire at the time supplied.
 At the time supplied, resque-scheduler will take the job out of the delayed
@@ -426,11 +426,11 @@ It's easy to start the resque-scheduler worker using `bin/resque-scheduler`:
 php-resque has a basic event system that can be used by your application to
 customize how some of the php-resque internals behave.
 
-You listen in on events (as listed below) by registering with `Resque_Event` and
+You listen in on events (as listed below) by registering with `Resque\Event` and
 supplying a callback that you would like triggered when the event is raised:
 
-```sh
-Resque_Event::listen('eventName', [callback]);
+```php
+Resque\Event::listen('eventName', [callback]);
 ```
 
 `[callback]` may be anything in PHP that is callable by `call_user_func_array`:
@@ -443,12 +443,12 @@ Resque_Event::listen('eventName', [callback]);
 Events may pass arguments (documented below), so your callback should accept
 these arguments.
 
-You can stop listening to an event by calling `Resque_Event::stopListening` with
-the same arguments supplied to `Resque_Event::listen`.
+You can stop listening to an event by calling `Resque\Event::stopListening` with
+the same arguments supplied to `Resque\Event::listen`.
 
 It is up to your application to register event listeners. When enqueuing events
 in your application, it should be as easy as making sure php-resque is loaded
-and calling `Resque_Event::listen`.
+and calling `Resque\Event::listen`.
 
 When running workers, if you run workers via the default `bin/resque` script,
 your `APP_INCLUDE` script should initialize and register any listeners required
@@ -462,12 +462,12 @@ A sample plugin is included in the `extras` directory.
 #### beforeFirstFork
 
 Called once, as a worker initializes. Argument passed is the instance of
-`Resque_Worker` that was just initialized.
+`Resque\Worker\ResqueWorker` that was just initialized.
 
 #### beforeFork
 
 Called before php-resque forks to run a job. Argument passed contains the
-instance of `Resque_Job` for the job about to be run.
+instance of `Resque\JobHandler` for the job about to be run.
 
 `beforeFork` is triggered in the **parent** process. Any changes made will be
 permanent for as long as the **worker** lives.
@@ -475,7 +475,7 @@ permanent for as long as the **worker** lives.
 #### afterFork
 
 Called after php-resque forks to run a job (but before the job is run). Argument
-passed contains the instance of `Resque_Job` for the job about to be run.
+passed contains the instance of `Resque\JobHandler` for the job about to be run.
 
 `afterFork` is triggered in the **child** process after forking out to complete
 a job. Any changes made will only live as long as the **job** is being
@@ -484,16 +484,16 @@ processed.
 #### beforePerform
 
 Called before the `setUp` and `perform` methods on a job are run. Argument
-passed contains the instance of `Resque_Job` for the job about to be run.
+passed contains the instance of `Resque\JobHandler` for the job about to be run.
 
 You can prevent execution of the job by throwing an exception of
-`Resque_Job_DontPerform`. Any other exceptions thrown will be treated as if they
+`Resque\Exceptions\DoNotPerformException`. Any other exceptions thrown will be treated as if they
 were thrown in a job, causing the job to fail.
 
 #### afterPerform
 
 Called after the `perform` and `tearDown` methods on a job are run. Argument
-passed contains the instance of `Resque_Job` that was just run.
+passed contains the instance of `Resque\JobHandler` that was just run.
 
 Any exceptions thrown will be treated as if they were thrown in a job, causing
 the job to be marked as having failed.
@@ -503,11 +503,11 @@ the job to be marked as having failed.
 Called whenever a job fails. Arguments passed (in this order) include:
 
 -   Exception - The exception that was thrown when the job failed
--   Resque_Job - The job that failed
+-   Resque\JobHandler - The job that failed
 
 #### beforeEnqueue
 
-Called immediately before a job is enqueued using the `Resque::enqueue` method.
+Called immediately before a job is enqueued using the `Resque\Resque::enqueue` method.
 Arguments passed (in this order) include:
 
 -   Class - string containing the name of the job to be enqueued
@@ -516,11 +516,11 @@ Arguments passed (in this order) include:
 -   ID - string containing the token of the job to be enqueued
 
 You can prevent enqueing of the job by throwing an exception of
-`Resque_Job_DontCreate`.
+`Resque\Exceptions\DoNotCreateException`.
 
 #### afterEnqueue
 
-Called after a job has been queued using the `Resque::enqueue` method. Arguments
+Called after a job has been queued using the `Resque\Resque::enqueue` method. Arguments
 passed (in this order) include:
 
 -   Class - string containing the name of scheduled job
