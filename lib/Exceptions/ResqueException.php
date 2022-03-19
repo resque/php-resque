@@ -2,7 +2,7 @@
 
 namespace Resque\Exceptions;
 
-use \Exception as CoreException;
+use \Exception;
 
 /**
  * Resque exception.
@@ -11,6 +11,6 @@ use \Exception as CoreException;
  * @author		Chris Boulton <chris@bigcommerce.com>
  * @license		http://www.opensource.org/licenses/mit-license.php
  */
-class Exception extends CoreException
+class ResqueException extends Exception
 {
 }

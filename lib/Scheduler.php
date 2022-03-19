@@ -2,7 +2,7 @@
 
 namespace Resque;
 
-use \Resque\Exceptions\Exception as ResqueException;
+use \Resque\Exceptions\ResqueException;
 use \Resque\Exceptions\InvalidTimestampException;
 use \DateTime;
 
@@ -260,7 +260,7 @@ class Scheduler
 	 *
 	 * @param string $class Name of job class.
 	 * @param string $queue Name of queue.
-	 * @throws \Resque\Exceptions\Exception
+	 * @throws \Resque\Exceptions\ResqueException
 	 */
 	private static function validateJob($class, $queue)
 	{

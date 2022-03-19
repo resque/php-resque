@@ -2,7 +2,7 @@
 
 namespace Resque\Job;
 
-use \Resque\Exceptions\Exception as ResqueException;
+use \Resque\Exceptions\ResqueException;
 
 class Factory implements FactoryInterface
 {
@@ -11,7 +11,7 @@ class Factory implements FactoryInterface
 	 * @param array $args
 	 * @param $queue
 	 * @return \Resque\Job\JobInterface
-	 * @throws \Resque\Exceptions\Exception
+	 * @throws \Resque\Exceptions\ResqueException
 	 */
 	public function create($className, $args, $queue)
 	{

@@ -147,7 +147,7 @@ class JobHandlerTest extends ResqueTestCase
 	}
 
 	/**
-	 * @expectedException \Resque\Exceptions\Exception
+	 * @expectedException \Resque\Exceptions\ResqueException
 	 */
 	public function testJobWithoutPerformMethodThrowsException()
 	{
@@ -158,7 +158,7 @@ class JobHandlerTest extends ResqueTestCase
 	}
 
 	/**
-	 * @expectedException Resque\Exceptions\Exception
+	 * @expectedException Resque\Exceptions\ResqueException
 	 */
 	public function testInvalidJobThrowsException()
 	{

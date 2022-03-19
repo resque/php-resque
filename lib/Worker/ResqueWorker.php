@@ -15,7 +15,7 @@ use \Resque\Job\Status;
 use \Resque\JobHandler;
 use \Resque\Stat;
 use \Psr\Log\LoggerInterface;
-use \Exception as CoreException;
+use \Exception;
 use \Error;
 
 /**
@@ -313,7 +313,7 @@ class ResqueWorker
 		try {
 			Event::trigger('afterFork', $job);
 			$result = $job->perform();
-		} catch (CoreException $e) {
+		} catch (Exception $e) {
 			$this->logger->log(LogLevel::CRITICAL, '{job} has failed {exception}', array('job' => $job, 'exception' => $e));
 			$job->fail($e);
 			return;

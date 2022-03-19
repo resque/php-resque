@@ -2,7 +2,7 @@
 
 namespace Resque\Exceptions;
 
-use \Exception as CoreException;
+use \Exception;
 
 /**
  * Exception to be thrown if a job should not be performed/run.
@@ -11,6 +11,6 @@ use \Exception as CoreException;
  * @author		Chris Boulton <chris@bigcommerce.com>
  * @license		http://www.opensource.org/licenses/mit-license.php
  */
-class DoNotPerformException extends CoreException
+class DoNotPerformException extends Exception
 {
 }

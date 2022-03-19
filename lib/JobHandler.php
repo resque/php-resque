@@ -177,7 +177,7 @@ class JobHandler
 	/**
 	 * Get the instantiated object for this job that will be performing work.
 	 * @return \Resque\Job\JobInterface Instance of the object that this job belongs to.
-	 * @throws \Resque\Exceptions\Exception
+	 * @throws \Resque\Exceptions\ResqueException
 	 */
 	public function getInstance()
 	{
@@ -195,7 +195,7 @@ class JobHandler
 	 * associated with the job with the supplied arguments.
 	 *
 	 * @return bool
-	 * @throws Resque\Exceptions\Exception When the job's class could not be found or it does not contain a perform method.
+	 * @throws Resque\Exceptions\ResqueException When the job's class could not be found or it does not contain a perform method.
 	 */
 	public function perform()
 	{

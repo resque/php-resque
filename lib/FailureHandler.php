@@ -3,7 +3,7 @@
 namespace Resque;
 
 use \Resque\Worker\ResqueWorker;
-use \Exception as CoreException;
+use \Exception;
 use \Error;
 
 /**
@@ -28,7 +28,7 @@ class FailureHandler
 	 * @param \Resque\Worker\ResqueWorker $worker Instance of Resque\Worker\ResqueWorker that was running this job when it failed.
 	 * @param string $queue          The name of the queue that this job was fetched from.
 	 */
-	public static function create($payload, CoreException $exception, ResqueWorker $worker, $queue)
+	public static function create($payload, Exception $exception, ResqueWorker $worker, $queue)
 	{
 		$backend = self::getBackend();
 		new $backend($payload, $exception, $worker, $queue);
