@@ -215,9 +215,8 @@ class JobHandler
 			}
 
 			Event::trigger('afterPerform', $this);
-		}
-		// beforePerform/setUp have said don't perform this job. Return.
-		catch (DoNotPerformException $e) {
+		} catch (DoNotPerformException $e) {
+			// beforePerform/setUp have said don't perform this job. Return.
 			$result = false;
 		}
 
