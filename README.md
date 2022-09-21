@@ -15,6 +15,7 @@ jobs on one or more queues, and processing them later.
 [![Code Quality](https://img.shields.io/scrutinizer/g/resque/php-resque.svg?style=flat-square&logo=scrutinizer)](https://scrutinizer-ci.com/g/resque/php-resque/)
 [![Code Coverage](https://img.shields.io/scrutinizer/coverage/g/resque/php-resque.svg?style=flat-square&logo=scrutinizer)](https://scrutinizer-ci.com/g/resque/php-resque/)
 [![Dependency Status](https://img.shields.io/librariesio/github/resque/php-resque.svg?style=flat-square)](https://libraries.io/github/resque/php-resque)
+[![kandi X-Ray](https://kandi.openweaver.com/badges/xray.svg)](https://kandi.openweaver.com/php/resque/php-resque)
 
 [![Latest Release](https://img.shields.io/github/release/resque/php-resque.svg?style=flat-square&logo=github&logoColor=white)](https://github.com/resque/php-resque)
 [![Latest Release Date](https://img.shields.io/github/release-date/resque/php-resque.svg?style=flat-square&logo=github&logoColor=white)](https://github.com/resque/php-resque)
