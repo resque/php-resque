@@ -32,6 +32,12 @@ abstract class Job
 	public $queue;
 
 	/**
+	 * Unique job ID
+	 * @var string
+	 */
+	public $jobID;
+
+	/**
 	 * (Optional) Job setup
 	 *
 	 * @return void

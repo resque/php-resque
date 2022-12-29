@@ -49,6 +49,7 @@ class EventTest extends ResqueTestCase
 			'args' => array(
 				array('somevar'),
 			),
+			'id' => Resque::generateJobId()
 		);
 		$job = new JobHandler('jobs', $payload);
 		$job->worker = $this->worker;

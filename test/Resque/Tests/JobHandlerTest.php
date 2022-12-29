@@ -163,6 +163,7 @@ class JobHandlerTest extends ResqueTestCase
 				'somevar',
 				'somevar2',
 			)),
+			'id' => Resque::generateJobId(),
 		);
 		$job = new JobHandler('jobs', $payload);
 		$job->perform();
@@ -178,6 +179,7 @@ class JobHandlerTest extends ResqueTestCase
 				'somevar',
 				'somevar2',
 			)),
+			'id' => Resque::generateJobId(),
 		);
 		$job = new JobHandler('jobs', $payload);
 		$job->perform();
@@ -384,7 +386,8 @@ class JobHandlerTest extends ResqueTestCase
 	{
 		$payload = array(
 			'class' => 'Resque\Tests\Some_Job_Class',
-			'args' => null
+			'args' => null,
+			'id' => Resque::generateJobId()
 		);
 		$job = new JobHandler('jobs', $payload);
 		$instance = $job->getInstance();
@@ -395,7 +398,8 @@ class JobHandlerTest extends ResqueTestCase
 	{
 		$payload = array(
 			'class' => 'Resque\Tests\Some_Job_Class',
-			'args' => array(array())
+			'args' => array(array()),
+			'id' => Resque::generateJobId()
 		);
 		$job = new JobHandler('jobs', $payload);
 		$factory = new Some_Stub_Factory();
@@ -408,7 +412,8 @@ class JobHandlerTest extends ResqueTestCase
 	{
 		$payload = array(
 			'class' => 'Resque\Tests\Some_Job_Class',
-			'args' => array(array())
+			'args' => array(array()),
+			'id' => Resque::generateJobId()
 		);
 		$job = new JobHandler('jobs', $payload);
 		$factory = $this->getMockBuilder('Resque\Job\FactoryInterface')
@@ -424,7 +429,8 @@ class JobHandlerTest extends ResqueTestCase
 	{
 		$payload = array(
 			'class' => 'Resque\Tests\Some_Job_Class',
-			'args' => null
+			'args' => null,
+			'id' => Resque::generateJobId()
 		);
 		$job = new JobHandler('jobs', $payload);
 		$this->assertEquals(null, $job->getStatus());
@@ -434,7 +440,8 @@ class JobHandlerTest extends ResqueTestCase
 	{
 		$payload = array(
 			'class' => 'Resque\Tests\Some_Job_Class',
-			'args' => null
+			'args' => null,
+			'id' => Resque::generateJobId()
 		);
 		$job = new JobHandler('jobs', $payload);
 		$job->recreate();
