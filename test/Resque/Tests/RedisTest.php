@@ -8,13 +8,12 @@
  */
 class Resque_Tests_RedisTest extends Resque_Tests_TestCase
 {
-	/**
-	 * @expectedException Resque_RedisException
-	 */
 	public function testRedisExceptionsAreSurfaced()
 	{
+		$this->expectException(Resque_RedisException::class);
+
 		$mockCredis = $this->getMockBuilder('Credis_Client')
-			->setMethods(['connect', '__call'])
+			->onlyMethods(['connect', '__call'])
 			->getMock();
 		$mockCredis->expects($this->any())->method('__call')
 			->will($this->throwException(new CredisException('failure')));
@@ -187,11 +186,11 @@ class Resque_Tests_RedisTest extends Resque_Tests_TestCase
 
 	/**
 	 * @dataProvider bogusDsnStringProvider
-	 * @expectedException InvalidArgumentException
 	 */
 	public function testParsingBogusDsnStringThrowsException($dsn)
 	{
+		$this->expectException(InvalidArgumentException::class);
 		// The next line should throw an InvalidArgumentException
-		$result = Resque_Redis::parseDsn($dsn);
+		Resque_Redis::parseDsn($dsn);
 	}
 }

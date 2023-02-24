@@ -14,6 +14,8 @@ class Resque_Redis
 	 */
 	private static $defaultNamespace = 'resque:';
 
+	private $driver;
+
 	/**
 	 * A default host to connect to
 	 */

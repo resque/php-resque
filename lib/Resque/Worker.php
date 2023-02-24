@@ -231,7 +231,7 @@ class Resque_Worker
 
 			// Forked and we're the child. Or PCNTL is not installed. Run the job.
 			if ($this->child === 0 || $this->child === false || $this->child === -1) {
-				$status = 'Processing ' . $job->queue . ' since ' . strftime('%F %T');
+				$status = 'Processing ' . $job->queue . ' since ' . date('Y-m-d H:i:s');
 				$this->updateProcLine($status);
 				$this->logger->log(Psr\Log\LogLevel::INFO, $status);
 
@@ -252,7 +252,7 @@ class Resque_Worker
 
 			if($this->child > 0) {
 				// Parent process, sit and wait
-				$status = 'Forked ' . $this->child . ' at ' . strftime('%F %T');
+				$status = 'Forked ' . $this->child . ' at ' . date('Y-m-d H:i:s');
 				$this->updateProcLine($status);
 				$this->logger->log(Psr\Log\LogLevel::INFO, $status);
 

@@ -139,7 +139,7 @@ class ResqueScheduler_Worker
 			fwrite(STDOUT, "*** " . $message . "\n");
 		}
 		else if($this->logLevel == self::LOG_VERBOSE) {
-			fwrite(STDOUT, "** [" . strftime('%T %Y-%m-%d') . "] " . $message . "\n");
+			fwrite(STDOUT, "** [" . date('H:i:s Y-m-d') . "] " . $message . "\n");
 		}
 	}
 
