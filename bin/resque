@@ -68,9 +68,10 @@ if($APP_INCLUDE) {
 }
 
 // See if the APP_INCLUDE containes a logger object,
-// If none exists, fallback to internal logger
+// If none exists, use the NullLogger instead, which
+// effectively disables logging.
 if (!isset($logger) || !is_object($logger)) {
-    $logger = new \Resque\Logger($logLevel);
+    $logger = new \Psr\Log\NullLogger();
 }
 
 $BLOCKING = getenv('BLOCKING') !== FALSE;

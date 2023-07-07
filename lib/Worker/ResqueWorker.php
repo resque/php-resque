@@ -4,10 +4,10 @@ declare(ticks=1);
 
 namespace Resque\Worker;
 
-use Resque\Logger;
 use Resque\Resque;
 use CredisException;
 use Psr\Log\LogLevel;
+use Psr\Log\NullLogger;
 use Resque\Job\PID;
 use Resque\Event;
 use Resque\Exceptions\DirtyExitException;
@@ -91,7 +91,7 @@ class ResqueWorker
 	 */
 	public function __construct($queues)
 	{
-		$this->logger = new Logger();
+		$this->logger = new NullLogger();
 
 		if (!is_array($queues)) {
 			$queues = array($queues);
