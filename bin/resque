@@ -113,7 +113,7 @@ if($count > 1) {
 		elseif(!$pid) {
 			$queues = explode(',', $QUEUE);
 			$worker = new Resque_Worker($queues);
-			$worker->logLevel = $logLevel;
+			$worker->setLogger($logger);
 			$worker->hasParent = TRUE;
 			fwrite(STDOUT, '*** Starting worker '.$worker."\n");
 			$worker->work($interval);
@@ -170,7 +170,7 @@ if($count > 1) {
 else {
 	$queues = explode(',', $QUEUE);
 	$worker = new Resque_Worker($queues);
-	$worker->logLevel = $logLevel;
+	$worker->setLogger($logger);
 	$worker->hasParent = FALSE;
 
 	$PIDFILE = getenv('PIDFILE');
