@@ -1,5 +1,7 @@
 <?php
 
+namespace Resque;
+
 /**
  * Resque event/plugin system class
  *
@@ -7,7 +9,7 @@
  * @author		Chris Boulton <chris@bigcommerce.com>
  * @license		http://www.opensource.org/licenses/mit-license.php
  */
-class Resque_Event
+class Event
 {
 	/**
 	 * @var array Array containing all registered callbacks, indexked by event name.

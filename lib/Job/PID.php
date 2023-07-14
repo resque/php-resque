@@ -1,5 +1,9 @@
 <?php
 
+namespace Resque\Job;
+
+use Resque\Resque;
+
 /**
  * PID tracker for the forked worker job.
  *
@@ -7,7 +11,7 @@
  * @author		Chris Boulton <chris@bigcommerce.com>
  * @license		http://www.opensource.org/licenses/mit-license.php
  */
-class Resque_Job_PID
+class PID
 {
 	/**
 	 * Create a new PID tracker item for the supplied job ID.

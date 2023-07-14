@@ -1,4 +1,11 @@
 <?php
+
+namespace Resque\Tests;
+
+use \Resque\Resque;
+use \PHPUnit_Framework_TestCase;
+use \Credis_Client;
+
 /**
  * Resque test case class. Contains setup and teardown methods.
  *
@@ -6,7 +13,7 @@
  * @author		Chris Boulton <chris@bigcommerce.com>
  * @license		http://www.opensource.org/licenses/mit-license.php
  */
-class Resque_Tests_TestCase extends PHPUnit_Framework_TestCase
+class ResqueTestCase extends PHPUnit_Framework_TestCase
 {
 	protected $resque;
 	protected $redis;

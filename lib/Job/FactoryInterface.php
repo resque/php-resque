@@ -1,12 +1,14 @@
 <?php
 
-interface Resque_Job_FactoryInterface
+namespace Resque\Job;
+
+interface FactoryInterface
 {
 	/**
 	 * @param $className
 	 * @param array $args
 	 * @param $queue
-	 * @return Resque_JobInterface
+	 * @return \Resque\Job\JobInterface
 	 */
 	public function create($className, $args, $queue);
 }

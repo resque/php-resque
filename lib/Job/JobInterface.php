@@ -1,6 +1,8 @@
 <?php
 
-interface Resque_JobInterface
+namespace Resque\Job;
+
+interface JobInterface
 {
 	/**
 	 * @return bool
