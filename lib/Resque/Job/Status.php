@@ -45,7 +45,7 @@ class Resque_Job_Status
 	public function __construct($id, $prefix = '')
 	{
 		$this->id = $id;
-		$this->prefix = empty($prefix) ? '' : "${prefix}_";
+		$this->prefix = empty($prefix) ? '' : "{$prefix}_";
 	}
 
 	/**
