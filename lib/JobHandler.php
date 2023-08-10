@@ -148,7 +148,8 @@ class JobHandler
 	/**
 	 * Return the status of the current job.
 	 *
-	 * @return int|null The status of the job as one of the Resque\Job\Status constants or null if job is not being tracked.
+	 * @return int|null The status of the job as one of the Resque\Job\Status constants
+	 *                  or null if job is not being tracked.
 	 */
 	public function getStatus()
 	{
@@ -195,7 +196,8 @@ class JobHandler
 	 * associated with the job with the supplied arguments.
 	 *
 	 * @return bool
-	 * @throws Resque\Exceptions\ResqueException When the job's class could not be found or it does not contain a perform method.
+	 * @throws Resque\Exceptions\ResqueException When the job's class could not be found
+	 * 											 or it does not contain a perform method.
 	 */
 	public function perform()
 	{
@@ -269,7 +271,14 @@ class JobHandler
 			}
 		}
 
-		return self::create($this->queue, $this->payload['class'], $this->getArguments(), $monitor, null, $this->getPrefix());
+		return self::create(
+			$this->queue,
+			$this->payload['class'],
+			$this->getArguments(),
+			$monitor,
+			null,
+			$this->getPrefix()
+		);
 	}
 
 	/**

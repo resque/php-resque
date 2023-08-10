@@ -25,7 +25,8 @@ class FailureHandler
 	 *
 	 * @param object $payload        The contents of the job that has just failed.
 	 * @param \Exception $exception  The exception generated when the job failed to run.
-	 * @param \Resque\Worker\ResqueWorker $worker Instance of Resque\Worker\ResqueWorker that was running this job when it failed.
+	 * @param \Resque\Worker\ResqueWorker $worker Instance of Resque\Worker\ResqueWorker
+	 *											  that was running this job when it failed.
 	 * @param string $queue          The name of the queue that this job was fetched from.
 	 */
 	public static function create($payload, Exception $exception, ResqueWorker $worker, $queue)
@@ -39,7 +40,8 @@ class FailureHandler
 	 *
 	 * @param object $payload        The contents of the job that has just failed.
 	 * @param \Error $exception  The PHP 7 error generated when the job failed to run.
-	 * @param \Resque\Worker\ResqueWorker $worker Instance of Resque\Worker\ResqueWorker that was running this job when it failed.
+	 * @param \Resque\Worker\ResqueWorker $worker Instance of Resque\Worker\ResqueWorker
+	 *											  that was running this job when it failed.
 	 * @param string $queue          The name of the queue that this job was fetched from.
 	 */
 	public static function createFromError($payload, Error $exception, ResqueWorker $worker, $queue)
