@@ -3,6 +3,7 @@
 namespace Resque;
 
 use InvalidArgumentException;
+use Resque\Job\PID;
 use Resque\Job\Status;
 use Resque\Exceptions\DoNotPerformException;
 use Resque\Job\FactoryInterface;
@@ -253,6 +254,11 @@ class JobHandler
 				$this->queue
 			);
 		}
+
+		if(!empty($this->payload['id'])) {
+			PID::del($this->payload['id']);
+		}
+
 		Stat::incr('failed');
 		Stat::incr('failed:' . $this->worker);
 	}
