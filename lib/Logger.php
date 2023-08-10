@@ -34,7 +34,7 @@ class Logger extends AbstractLogger
 		if ($this->verbose) {
 			fwrite(
 				STDOUT,
-				'[' . $level . '] [' . strftime('%T %Y-%m-%d') . '] ' . $this->interpolate($message, $context) . PHP_EOL
+				'[' . $level . '] [' . date('H:i:s Y-m-d') . '] ' . $this->interpolate($message, $context) . PHP_EOL
 			);
 			return;
 		}
