@@ -255,7 +255,7 @@ class JobHandler
 			);
 		}
 
-		if(!empty($this->payload['id'])) {
+		if (!empty($this->payload['id'])) {
 			PID::del($this->payload['id']);
 		}
 
