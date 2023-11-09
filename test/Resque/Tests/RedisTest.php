@@ -29,7 +29,7 @@ class Resque_Tests_RedisTest extends Resque_Tests_TestCase
 	 *
 	 * @return array
 	 */
-	public function validDsnStringProvider()
+	public static function validDsnStringProvider(): array
 	{
 		return array(
 			// Input , Expected output
@@ -166,7 +166,7 @@ class Resque_Tests_RedisTest extends Resque_Tests_TestCase
 	 * These DSN values should throw exceptions
 	 * @return array
 	 */
-	public function bogusDsnStringProvider()
+	public static function bogusDsnStringProvider(): array
 	{
 		return array(
 			array('http://foo.bar/'),

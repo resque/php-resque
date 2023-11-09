@@ -40,7 +40,7 @@ class Resque_Tests_EventTest extends Resque_Tests_TestCase
 		return $job;
 	}
 
-	public function eventCallbackProvider()
+	public static function eventCallbackProvider(): array
 	{
 		return array(
 			array('beforePerform', 'beforePerformEventCallback'),
