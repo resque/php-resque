@@ -6,6 +6,7 @@ use \Resque\Worker\ResqueWorker;
 use \Resque\Job\Status;
 use \Resque\JobHandler;
 use \Resque\Resque;
+use \stdClass;
 
 /**
  * Status tests.
@@ -28,6 +29,25 @@ class JobStatusTest extends ResqueTestCase
 		// Register a worker to test with
 		$this->worker = new ResqueWorker('jobs');
 		$this->worker->setLogger($this->logger);
+	}
+
+	/**
+	 * Unit test data provider for potential return values from perform().
+	 *
+	 * @return array
+	 */
+	public static function performResultProvider(): array
+	{
+		$data = [];
+
+		$data['boolean'] = [ true ];
+		$data['float']   = [ 1.0 ];
+		$data['integer'] = [ 100 ];
+		$data['string']  = [ 'string' ];
+		$data['null']    = [ null ];
+		$data['array']   = [[ 'key' => 'value' ]];
+
+		return $data;
 	}
 
 	public function testJobStatusCanBeTracked()
@@ -74,6 +94,28 @@ class JobStatusTest extends ResqueTestCase
 		$this->worker->work(0);
 		$status = new Status($token);
 		$this->assertEquals(Status::STATUS_COMPLETE, $status->get());
+	}
+
+	/**
+	 * @param mixed $value Potential return value from perform()
+	 *
+	 * @dataProvider performResultProvider
+	 */
+	public function testCompletedJobReturnsResult($value)
+	{
+		$token = Resque::enqueue('jobs', 'Returning_Job', [ 'return' => $value ], true);
+		$this->worker->work(0);
+		$status = new Status($token);
+		$this->assertEquals($value, $status->result());
+	}
+
+	public function testCompletedJobReturnsObjectResultAsArray()
+	{
+		$value = new stdClass();
+		$token = Resque::enqueue('jobs', 'Returning_Job', [ 'return' => $value ], true);
+		$this->worker->work(0);
+		$status = new Status($token);
+		$this->assertEquals([], $status->result());
 	}
 
 	public function testStatusIsNotTrackedWhenToldNotTo()

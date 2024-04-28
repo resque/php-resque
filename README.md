@@ -110,7 +110,7 @@ Resque\Resque::enqueue('default', 'My_Job', $args);
 Each job should be in its own class, and include a `perform` method.
 
 ```php
-class My_Job
+class My_Job extends \Resque\Job\Job
 {
     public function perform()
     {
@@ -132,9 +132,9 @@ defined, it will be called before the `perform` method is run. The `tearDown`
 method, if defined, will be called after the job finishes.
 
 ```php
-class My_Job
+class My_Job extends \Resque\Job\Job
 {
-    public function setUp()
+    public function setUp(): void
     {
         // ... Set up environment for this job
     }
@@ -144,7 +144,7 @@ class My_Job
         // .. Run job
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         // ... Remove environment for this job
     }
