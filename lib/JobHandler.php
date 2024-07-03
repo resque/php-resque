@@ -2,7 +2,6 @@
 
 namespace Resque;
 
-use InvalidArgumentException;
 use Resque\Job\PID;
 use Resque\Job\Status;
 use Resque\Exceptions\DoNotPerformException;
@@ -84,19 +83,13 @@ class JobHandler
 	 * @param string $prefix The prefix needs to be set for the status key
 	 *
 	 * @return string
-	 * @throws \InvalidArgumentException
 	 */
-	public static function create($queue, $class, $args = null, $monitor = false, $id = null, $prefix = "")
+	public static function create($queue, $class, array $args = [], $monitor = false, $id = null, $prefix = "")
 	{
 		if (is_null($id)) {
 			$id = Resque::generateJobId();
 		}
 
-		if ($args !== null && !is_array($args)) {
-			throw new InvalidArgumentException(
-				'Supplied $args must be an array.'
-			);
-		}
 		Resque::push($queue, array(
 			'class'	     => $class,
 			'args'	     => array($args),
@@ -184,7 +177,7 @@ class JobHandler
 	 *
 	 * @return array Array of arguments.
 	 */
-	public function getArguments()
+	public function getArguments(): array
 	{
 		if (!isset($this->payload['args'])) {
 			return array();

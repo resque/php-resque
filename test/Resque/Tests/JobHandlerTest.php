@@ -68,15 +68,6 @@ class JobHandlerTest extends ResqueTestCase
 		$this->assertEquals('Test_Job', $job->payload['class']);
 	}
 
-	public function testObjectArgumentsCannotBePassedToJob()
-	{
-		$this->expectException('InvalidArgumentException');
-
-		$args = new stdClass();
-		$args->test = 'somevalue';
-		Resque::enqueue('jobs', 'Test_Job', $args);
-	}
-
 	public function testQueuedJobReturnsExactSamePassedInArguments()
 	{
 		$args = array(
@@ -168,10 +159,10 @@ class JobHandlerTest extends ResqueTestCase
 	{
 		$payload = array(
 			'class' => 'Test_Job_With_SetUp',
-			'args' => array(
+			'args' => array(array(
 				'somevar',
 				'somevar2',
-			),
+			)),
 		);
 		$job = new JobHandler('jobs', $payload);
 		$job->perform();
@@ -183,10 +174,10 @@ class JobHandlerTest extends ResqueTestCase
 	{
 		$payload = array(
 			'class' => 'Test_Job_With_TearDown',
-			'args' => array(
+			'args' => array(array(
 				'somevar',
 				'somevar2',
-			),
+			)),
 		);
 		$job = new JobHandler('jobs', $payload);
 		$job->perform();

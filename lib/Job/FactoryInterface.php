@@ -10,5 +10,5 @@ interface FactoryInterface
 	 * @param $queue
 	 * @return \Resque\Job\Job
 	 */
-	public function create($className, $args, $queue): Job;
+	public function create(string $className, array $args, string $queue): Job;
 }

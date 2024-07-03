@@ -34,7 +34,7 @@ class JobPIDTest extends ResqueTestCase
 		$this->logger->expects($this->never())
 					 ->method('log');
 
-		$token = Resque::enqueue('jobs', 'Test_Job', null, true);
+		$token = Resque::enqueue('jobs', 'Test_Job', [], true);
 		$this->assertEquals(0, PID::get($token));
 	}
 
@@ -43,14 +43,14 @@ class JobPIDTest extends ResqueTestCase
 		// Cannot use InProgress_Job on non-forking OS.
 		if(!function_exists('pcntl_fork')) return;
 
-		$token = Resque::enqueue('jobs', 'InProgress_Job', null, true);
+		$token = Resque::enqueue('jobs', 'InProgress_Job', [], true);
 		$this->worker->work(0);
 		$this->assertNotEquals(0, PID::get($token));
 	}
 
 	public function testFinishedJobDoesNotReturnPID()
 	{
-		$token = Resque::enqueue('jobs', 'Test_Job', null, true);
+		$token = Resque::enqueue('jobs', 'Test_Job', [], true);
 		$this->worker->work(0);
 		$this->assertEquals(0, PID::get($token));
 	}

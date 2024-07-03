@@ -13,7 +13,7 @@ class Factory implements FactoryInterface
 	 * @return \Resque\Job\Job
 	 * @throws \Resque\Exceptions\ResqueException
 	 */
-	public function create($className, $args, $queue): Job
+	public function create(string $className, array $args, string $queue): Job
 	{
 		if (!class_exists($className)) {
 			throw new ResqueException(
