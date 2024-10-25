@@ -21,7 +21,6 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-versions }}
-          tools: phpunit:5
           extensions: redis
 
       - name: Setup problem matchers for PHP
@@ -37,7 +36,7 @@ jobs:
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
       - name: Run PHPunit
-        run: phpunit --configuration phpunit.xml.dist
+        run: ./vendor/bin/phpunit --configuration phpunit.xml.dist
 
   phpcs:
     runs-on: ubuntu-latest
@@ -51,13 +50,13 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '7.4'
-          tools: cs2pr, phpcs
+          tools: cs2pr
 
       - name: Setup problem matchers for PHP
         run: echo "::add-matcher::${{ runner.tool_cache }}/php.json"
 
       - name: Run PHPCS
-        run: phpcs -q --report=checkstyle lib | cs2pr
+        run: ./vendor/bin/phpcs -q --report=checkstyle lib | cs2pr
 
   phpstan:
     runs-on: ubuntu-latest
@@ -71,7 +70,6 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '7.4'
-          tools: phpstan
 
       - name: Setup problem matchers for PHP
         run: echo "::add-matcher::${{ runner.tool_cache }}/php.json"
@@ -80,5 +78,5 @@ jobs:
         run: composer install
 
       - name: Run PHPStan
-        run: phpstan analyse lib -l1
+        run: ./vendor/bin/phpstan analyse lib -l1
 
