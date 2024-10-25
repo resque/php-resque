@@ -46,11 +46,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Setup PHPCS
+      - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '7.4'
           tools: cs2pr
+
+      - name: Install dependencies
+        run: composer install
 
       - name: Setup problem matchers for PHP
         run: echo "::add-matcher::${{ runner.tool_cache }}/php.json"
