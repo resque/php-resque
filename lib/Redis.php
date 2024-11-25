@@ -151,7 +151,7 @@ class Redis
 	 *                      DSN-supplied value will be used instead and this parameter is ignored.
 	 * @param object $client Optional Credis_Cluster or Credis_Client instance instantiated by you
 	 */
-	public function __construct($server, $database = null, $client = null)
+	public function __construct($server, $database = null, $client = null, $auth = null)
 	{
 		try {
 			if (is_object($client)) {
@@ -172,7 +172,7 @@ class Redis
 				$this->driver = new Credis_Client($host, $port, $timeout, $persistent);
 				$this->driver->setMaxConnectRetries($maxRetries);
 				if ($password) {
-					$this->driver->auth($password);
+					$auth = $password;
 				}
 
 				// If we have found a database in our DSN, use it instead of the `$database`
@@ -180,6 +180,10 @@ class Redis
 				if ($dsnDatabase !== false) {
 					$database = $dsnDatabase;
 				}
+			}
+
+			if ($auth !== null) {
+				$this->driver->auth($auth);
 			}
 
 			if ($database !== null) {
