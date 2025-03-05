@@ -68,7 +68,7 @@ See <https://github.com/chrisboulton/php-resque> for more on that history.
 
 ## Requirements
 
--   PHP 5.3+
+-   PHP 7.3+
 -   Redis 2.2+
 -   Optional but Recommended: Composer
 
