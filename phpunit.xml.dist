@@ -17,8 +17,8 @@
 	</testsuites>
 
 	<coverage>
-		<include>
-			<directory suffix=".php">./lib/Resque/</directory>
+	    <include>
+			<directory suffix=".php">./lib</directory>
 		</include>
 	</coverage>
 </phpunit>
