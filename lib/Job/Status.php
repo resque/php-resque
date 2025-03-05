@@ -97,7 +97,8 @@ class Status
 	/**
 	 * Update the status indicator for the current job with a new status.
 	 *
-	 * @param int The status of the job (see constants in Resque\Job\Status)
+	 * @param int 	$status The status of the job (see constants in Resque\Job\Status)
+	 * @param mixed $result The result of the job
 	 */
 	public function update($status, $result = null)
 	{

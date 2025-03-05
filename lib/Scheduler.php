@@ -73,7 +73,7 @@ class Scheduler
 		$redis = Resque::redis();
 		$redis->rpush('delayed:' . $timestamp, json_encode($item));
 
-		$redis->zadd('delayed_queue_schedule', $timestamp, $timestamp);
+		$redis->zadd('delayed_queue_schedule', $timestamp, (string) $timestamp);
 	}
 
 	/**
@@ -95,7 +95,7 @@ class Scheduler
 	public static function getDelayedTimestampSize($timestamp)
 	{
 		$timestamp = self::getTimestamp($timestamp);
-		return Resque::redis()->llen('delayed:' . $timestamp, $timestamp);
+		return Resque::redis()->llen('delayed:' . $timestamp);
 	}
 
 	/**
@@ -184,7 +184,7 @@ class Scheduler
 
 		if ($redis->llen($key) == 0) {
 			$redis->del($key);
-			$redis->zrem('delayed_queue_schedule', $timestamp);
+			$redis->zrem('delayed_queue_schedule', (string) $timestamp);
 		}
 	}
 
@@ -193,7 +193,7 @@ class Scheduler
 	 *
 	 * @param \DateTime|int $timestamp Instance of DateTime or UNIX timestamp.
 	 * @return int Timestamp
-	 * @throws Scheduler_InvalidTimestampException
+	 * @throws InvalidTimestampException
 	 */
 	private static function getTimestamp($timestamp)
 	{
@@ -218,8 +218,8 @@ class Scheduler
 	 * that any jobs scheduled for the past when the worker wasn't running are
 	 * also queued up.
 	 *
-	 * @param \DateTime|int $timestamp Instance of DateTime or UNIX timestamp.
-	 *                                Defaults to now.
+	 * @param \DateTime|int $at Instance of DateTime or UNIX timestamp.
+	 *                          Defaults to now.
 	 * @return int|false UNIX timestamp, or false if nothing to run.
 	 */
 	public static function nextDelayedTimestamp($at = null)
