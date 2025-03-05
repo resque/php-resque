@@ -69,12 +69,12 @@ class ResqueWorker
 	private $id;
 
 	/**
-	 * @var \Resque\JobHandler Current job, if any, being processed by this worker.
+	 * @var \Resque\JobHandler|null Current job, if any, being processed by this worker.
 	 */
 	private $currentJob = null;
 
 	/**
-	 * @var int Process ID of child worker processes.
+	 * @var int|null Process ID of child worker processes.
 	 */
 	private $child = null;
 
@@ -145,7 +145,7 @@ class ResqueWorker
 	 * Given a worker ID, find it and return an instantiated worker class for it.
 	 *
 	 * @param string $workerId The ID of the worker.
-	 * @return \Resque\Worker\ResqueWorker Instance of the worker. False if the worker does not exist.
+	 * @return \Resque\Worker\ResqueWorker|false Instance of the worker. False if the worker does not exist.
 	 */
 	public static function find($workerId)
 	{
@@ -338,7 +338,7 @@ class ResqueWorker
 	/**
 	 * @param  bool            $blocking
 	 * @param  int             $timeout
-	 * @return object|boolean               Instance of Resque\JobHandler if a job is found, false if not.
+	 * @return \Resque\JobHandler|boolean Instance of Resque\JobHandler if a job is found, false if not.
 	 */
 	public function reserve($blocking = false, $timeout = null)
 	{
@@ -349,7 +349,7 @@ class ResqueWorker
 
 		$queues = $this->queues();
 		if (!is_array($queues)) {
-			return;
+			return false;
 		}
 
 		if ($blocking === true) {
@@ -423,7 +423,7 @@ class ResqueWorker
 	 */
 	private function updateProcLine($status)
 	{
-		$processTitle  = static::$processPrefix . '-' . Resque::VERSION;
+		$processTitle  = self::$processPrefix . '-' . Resque::VERSION;
 		$processTitle .= ' (' . implode(',', $this->queues) . '): ' . $status;
 		if (function_exists('cli_set_process_title') && PHP_OS !== 'Darwin') {
 			cli_set_process_title($processTitle);
@@ -605,7 +605,7 @@ class ResqueWorker
 	/**
 	 * Tell Redis which job we're currently working on.
 	 *
-	 * @param object $job \Resque\JobHandler instance containing the job we're working on.
+	 * @param \Resque\JobHandler $job instance containing the job we're working on.
 	 */
 	public function workingOn(JobHandler $job)
 	{
@@ -645,7 +645,7 @@ class ResqueWorker
 	/**
 	 * Return an object describing the job this worker is currently working on.
 	 *
-	 * @return object Object with details of current job.
+	 * @return array<string, mixed> Object with details of current job.
 	 */
 	public function job()
 	{

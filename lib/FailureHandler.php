@@ -23,8 +23,8 @@ class FailureHandler
 	/**
 	 * Create a new failed job on the backend.
 	 *
-	 * @param object $payload        The contents of the job that has just failed.
-	 * @param \Exception $exception  The exception generated when the job failed to run.
+	 * @param object|array                $payload        The contents of the job that has just failed.
+	 * @param \Exception                  $exception  The exception generated when the job failed to run.
 	 * @param \Resque\Worker\ResqueWorker $worker Instance of Resque\Worker\ResqueWorker
 	 *											  that was running this job when it failed.
 	 * @param string $queue          The name of the queue that this job was fetched from.
@@ -38,8 +38,8 @@ class FailureHandler
 	/**
 	 * Create a new failed job on the backend from PHP 7 errors.
 	 *
-	 * @param object $payload        The contents of the job that has just failed.
-	 * @param \Error $exception  The PHP 7 error generated when the job failed to run.
+	 * @param object|array $payload               The contents of the job that has just failed.
+	 * @param \Error       $exception             The PHP 7 error generated when the job failed to run.
 	 * @param \Resque\Worker\ResqueWorker $worker Instance of Resque\Worker\ResqueWorker
 	 *											  that was running this job when it failed.
 	 * @param string $queue          The name of the queue that this job was fetched from.
@@ -53,7 +53,7 @@ class FailureHandler
 	/**
 	 * Return an instance of the backend for saving job failures.
 	 *
-	 * @return object Instance of backend object.
+	 * @return object|string Instance of backend object.
 	 */
 	public static function getBackend()
 	{
