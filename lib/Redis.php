@@ -15,7 +15,7 @@ use InvalidArgumentException;
  * @author		Chris Boulton <chris@bigcommerce.com>
  * @license		http://www.opensource.org/licenses/mit-license.php
  *
- * @method array|null    blpop(string $keyN, int $timeout)
+ * @method array|null    blpop(string|string[] $keyN, int $timeout)
  * @method int           decrby(string $key, int $decrement)
  * @method int           del(string|array ...$keys)
  * @method int           exists(string $key)
