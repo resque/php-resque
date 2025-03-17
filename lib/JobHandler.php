@@ -51,7 +51,7 @@ class JobHandler
 	public $endTime;
 
 	/**
-	 * @var Job|null Instance of the class performing work for this job.
+	 * @var Job Instance of the class performing work for this job.
 	 */
 	private $instance;
 
@@ -68,7 +68,6 @@ class JobHandler
 	 */
 	public function __construct($queue, $payload)
 	{
-		$this->instance = null;
 		$this->queue = $queue;
 		$this->payload = $payload;
 		$this->popTime = microtime(true);
@@ -81,12 +80,12 @@ class JobHandler
 	/**
 	 * Create a new job and save it to the specified queue.
 	 *
-	 * @param string 	   $queue   The name of the queue to place the job in.
-	 * @param class-string<Resque\Job\Job> $class   The name of the class that contains the code to execute the job.
-	 * @param array        $args    Any optional arguments that should be passed when the job is executed.
-	 * @param boolean 	   $monitor Set to true to be able to monitor the status of a job.
-	 * @param string 	   $id      Unique identifier for tracking the job. Generated if not supplied.
-	 * @param string 	   $prefix  The prefix needs to be set for the status key
+	 * @param string 	   		$queue   The name of the queue to place the job in.
+	 * @param class-string<Job> $class   The name of the class that contains the code to execute the job.
+	 * @param array        		$args    Any optional arguments that should be passed when the job is executed.
+	 * @param boolean 	   		$monitor Set to true to be able to monitor the status of a job.
+	 * @param string 	   		$id      Unique identifier for tracking the job. Generated if not supplied.
+	 * @param string 	   		$prefix  The prefix needs to be set for the status key
 	 *
 	 * @return string
 	 */
@@ -194,12 +193,12 @@ class JobHandler
 
 	/**
 	 * Get the instantiated object for this job that will be performing work.
-	 * @return \Resque\Job\Job Instance of the object that this job belongs to.
-	 * @throws \Resque\Exceptions\ResqueException
+	 * @return Job Instance of the object that this job belongs to.
+	 * @throws ResqueException
 	 */
 	public function getInstance(): Job
 	{
-		if (!is_null($this->instance)) {
+		if (!isset($this->instance)) {
 			return $this->instance;
 		}
 
