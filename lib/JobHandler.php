@@ -198,7 +198,7 @@ class JobHandler
 	 */
 	public function getInstance(): Job
 	{
-		if (!isset($this->instance)) {
+		if (isset($this->instance)) {
 			return $this->instance;
 		}
 
