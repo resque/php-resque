@@ -223,7 +223,7 @@ class Redis
 		$parts = parse_url($dsn);
 
 		// Check the URI scheme
-		$validSchemes = array('redis', 'tcp');
+		$validSchemes = array('redis', 'rediss', 'tcp');
 		if (isset($parts['scheme']) && ! in_array($parts['scheme'], $validSchemes)) {
 			throw new InvalidArgumentException("Invalid DSN. Supported schemes are " . implode(', ', $validSchemes));
 		}
