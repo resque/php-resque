@@ -223,7 +223,7 @@ class Redis
 		$parts = parse_url($dsn);
 
 		// Check the URI scheme
-		$validSchemes = array('redis', 'rediss', 'tcp');
+		$validSchemes = array('redis', 'tcp', 'rediss', 'tls', 'ssl');
 		if (isset($parts['scheme']) && ! in_array($parts['scheme'], $validSchemes)) {
 			throw new InvalidArgumentException("Invalid DSN. Supported schemes are " . implode(', ', $validSchemes));
 		}
@@ -266,8 +266,14 @@ class Redis
 			$pass = isset($parts['pass']) ? $parts['pass'] : false;
 		}
 
+		$host = $parts['host'];
+
+		if (isset($parts['scheme']) && in_array($parts['scheme'], [ 'tls', 'ssl' ])) {
+			$host = $parts['scheme'] . '://' . $parts['host'];
+		}
+
 		return array(
-			$parts['host'],
+			$host,
 			$port,
 			$database,
 			$user,
