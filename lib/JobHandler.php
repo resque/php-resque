@@ -5,6 +5,7 @@ namespace Resque;
 use Resque\Job\PID;
 use Resque\Job\Status;
 use Resque\Exceptions\DoNotPerformException;
+use Resque\Exceptions\ResqueException;
 use Resque\Job\FactoryInterface;
 use Resque\Job\Factory;
 use Resque\Job\Job;
@@ -25,7 +26,7 @@ class JobHandler
 	public $queue;
 
 	/**
-	 * @var \Resque\Worker\Resque Instance of the Resque worker running this job.
+	 * @var \Resque\Worker\ResqueWorker Instance of the Resque worker running this job.
 	 */
 	public $worker;
 
@@ -79,12 +80,12 @@ class JobHandler
 	/**
 	 * Create a new job and save it to the specified queue.
 	 *
-	 * @param string $queue The name of the queue to place the job in.
-	 * @param string $class The name of the class that contains the code to execute the job.
-	 * @param array $args Any optional arguments that should be passed when the job is executed.
-	 * @param boolean $monitor Set to true to be able to monitor the status of a job.
-	 * @param string $id Unique identifier for tracking the job. Generated if not supplied.
-	 * @param string $prefix The prefix needs to be set for the status key
+	 * @param string 	   		$queue   The name of the queue to place the job in.
+	 * @param class-string<Job> $class   The name of the class that contains the code to execute the job.
+	 * @param array        		$args    Any optional arguments that should be passed when the job is executed.
+	 * @param boolean 	   		$monitor Set to true to be able to monitor the status of a job.
+	 * @param string 	   		$id      Unique identifier for tracking the job. Generated if not supplied.
+	 * @param string 	   		$prefix  The prefix needs to be set for the status key
 	 *
 	 * @return string
 	 */
@@ -192,16 +193,17 @@ class JobHandler
 
 	/**
 	 * Get the instantiated object for this job that will be performing work.
-	 * @return \Resque\Job\Job Instance of the object that this job belongs to.
-	 * @throws \Resque\Exceptions\ResqueException
+	 * @return Job Instance of the object that this job belongs to.
+	 * @throws ResqueException
 	 */
 	public function getInstance(): Job
 	{
-		if (!is_null($this->instance)) {
+		if (isset($this->instance)) {
 			return $this->instance;
 		}
 
-		$this->instance = $this->getJobFactory()->create($this->payload['class'], $this->getArguments(), $this->queue);
+		$this->instance = $this->getJobFactory()
+							   ->create($this->payload['class'], $this->getArguments(), $this->queue);
 		$this->instance->job = $this;
 		$this->instance->jobID = $this->payload['id'];
 		return $this->instance;
@@ -211,8 +213,8 @@ class JobHandler
 	 * Actually execute a job by calling the perform method on the class
 	 * associated with the job with the supplied arguments.
 	 *
-	 * @return mixed
-	 * @throws Resque\Exceptions\ResqueException When the job's class could not be found.
+	 * @return mixed Return of perform, or false if DoNotPerformException was thrown
+	 * @throws ResqueException When the job's class could not be found.
 	 */
 	public function perform()
 	{
@@ -325,8 +327,8 @@ class JobHandler
 	}
 
 	/**
-	 * @param Resque\Job\FactoryInterface $jobFactory
-	 * @return Resque\JobHandler
+	 * @param \Resque\Job\FactoryInterface $jobFactory
+	 * @return \Resque\JobHandler
 	 */
 	public function setJobFactory(FactoryInterface $jobFactory)
 	{
@@ -336,7 +338,7 @@ class JobHandler
 	}
 
 	/**
-	 * @return Resque\Job\FactoryInterface
+	 * @return \Resque\Job\FactoryInterface
 	 */
 	public function getJobFactory(): FactoryInterface
 	{

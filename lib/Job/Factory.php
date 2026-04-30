@@ -7,9 +7,10 @@ use Resque\Exceptions\ResqueException;
 class Factory implements FactoryInterface
 {
 	/**
-	 * @param $className
-	 * @param array $args
-	 * @param $queue
+	 * @param class-string<\Resque\Job\Job> $className
+	 * @param array        							 $args
+	 * @param string       							 $queue
+	 *
 	 * @return \Resque\Job\Job
 	 * @throws \Resque\Exceptions\ResqueException
 	 */

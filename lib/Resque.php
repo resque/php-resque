@@ -19,7 +19,7 @@ class Resque
 	public const DEFAULT_INTERVAL = 5;
 
 	/**
-	 * @var Redis Instance of Resque\Redis that talks to redis.
+	 * @var Redis|null Instance of Resque\Redis that talks to redis.
 	 */
 	public static $redis = null;
 
@@ -89,7 +89,7 @@ class Resque
 	 *
 	 * Will close connection to Redis before forking.
 	 *
-	 * @return int Return vars as per pcntl_fork(). False if pcntl_fork is unavailable
+	 * @return int|false Return vars as per pcntl_fork(). False if pcntl_fork is unavailable
 	 */
 	public static function fork()
 	{
@@ -135,14 +135,14 @@ class Resque
 	 * return it.
 	 *
 	 * @param string $queue The name of the queue to fetch an item from.
-	 * @return array Decoded item from the queue.
+	 * @return array|null Decoded item from the queue.
 	 */
 	public static function pop($queue)
 	{
 		$item = self::redis()->lpop('queue:' . $queue);
 
 		if (!$item) {
-			return;
+			return null;
 		}
 
 		return json_decode($item, true);
@@ -195,7 +195,7 @@ class Resque
 		$item = self::redis()->blpop($list, (int)$timeout);
 
 		if (!$item) {
-			return;
+			return null;
 		}
 
 		/**
