@@ -56,6 +56,13 @@
 			"Resque\\Tests\\": "test/Resque/Tests"
 		}
 	},
+	"config": {
+		"audit": {
+			"ignore": {
+				"PKSA-z3gr-8qht-p93v": "This project does not use PHPT tests, so CVE-2026-24765 is not applicable"
+			}
+		}
+	},
 	"extra": {
 		"branch-alias": {
 			"dev-master": "1.0-dev"
