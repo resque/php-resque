@@ -268,8 +268,9 @@ class Redis
 
 		$host = $parts['host'];
 
-		if (isset($parts['scheme']) && in_array($parts['scheme'], [ 'tls', 'ssl' ])) {
-			$host = $parts['scheme'] . '://' . $parts['host'];
+		if (isset($parts['scheme']) && in_array($parts['scheme'], [ 'tls', 'ssl', 'rediss' ])) {
+			$scheme = $parts['scheme'] === 'rediss' ? 'tls' : $parts['scheme'];
+			$host = $scheme . '://' . $parts['host'];
 		}
 
 		return array(
