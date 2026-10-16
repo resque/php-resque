@@ -159,7 +159,7 @@ class Redis
 			} elseif (is_object($server)) {
 				$this->driver = $server;
 			} elseif (is_array($server)) {
-				$this->driver = new Credis_Cluster($server);
+				$this->driver = new Credis_Cluster(null, $server);
 			} else {
 				list($host, $port, $dsnDatabase, $user, $password, $options) = self::parseDsn($server);
 				// $user is not used, only $password

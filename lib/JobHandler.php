@@ -51,7 +51,7 @@ class JobHandler
 	public $endTime;
 
 	/**
-	 * @var Job Instance of the class performing work for this job.
+	 * @var Job|null Instance of the class performing work for this job.
 	 */
 	private $instance;
 
